@@ -22,7 +22,7 @@ def register():
         return jsonify({"message":"email already taken","success":False}) , 400
     
     #inserting to db
-    registerd_res = users.insert_one({"username": username, "email": email, "password": hashed_password,"classes":[]})
+    registerd_res = users.insert_one({"username": username, "email": email, "password": hashed_password,"student":[],"teacher":[]})
     userid = str(registerd_res.inserted_id)
     print(userid)
     print(registerd_res)
@@ -30,7 +30,8 @@ def register():
     token = jwt.encode({
         "userid":userid,
         "username":username,
-        "email":email
+        "email":email,
+        "roles":{},
     },current_app.config['JWT_SECRET'],algorithm='HS256')
 
     #set cookie and response
@@ -54,11 +55,17 @@ def login():
         return jsonify({"message":"user not found or password not matching"}) , 401
 
     print(user) 
+    roles = {}
+    for class_id in user['teachers']:
+        roles[class_id] = 'teacher'
+    for class_id in user['students']:
+        roles[class_id] = 'student'
     #create jwt token
     token = jwt.encode({
         "userid":str(user['_id']),
         "username":user['username'],
-        "email":user['email']
+        "email":user['email'],
+        "roles":roles
     },current_app.config['JWT_SECRET'],algorithm='HS256')
 
     #set cookie and response

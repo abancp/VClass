@@ -3,3 +3,4 @@ client = MongoClient("mongodb://localhost:27017")
 db = client['VClass']
 users = db['users']
 classes = db['classes']
+works = db['works']

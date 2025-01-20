@@ -1,10 +1,12 @@
+import jwt
+from jwt import algorithms
 from bson.objectid import ObjectId
-from flask import Blueprint, json, jsonify, request
+from flask import Blueprint, current_app, json, jsonify, make_response, request
 from config.mongodb import classes,users
 from middlewares.jwt_protect import jwt_required
 from nanoid import generate
 from bson import json_util
-
+from middlewares.memeber_required import member_require
 class_bp = Blueprint('class',__name__)
 
 @class_bp.route("/",methods=['POST'])
@@ -19,30 +21,37 @@ def create_class(userdata):
         data['number_of_students'] = 0
         data['creater'] = userdata['userid']
         inserted_class = classes.insert_one(data)
-        users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"classes":str(inserted_class.inserted_id)}})
-        return jsonify({"success":True,"classid":str(inserted_class.inserted_id),"message":"created class : "+data['name']})  
+        users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"teacher":str(inserted_class.inserted_id)}})
+        userdata['roles'][str(inserted_class.inserted_id)] = "teacher"
+        token = jwt.encode(userdata,current_app.config['JWT_SECRET'],algorithm='HS256')
+        res =  make_response(jsonify({"success":True,"classid":str(inserted_class.inserted_id),"message":"created class : "+data['name']}))  
+        res.set_cookie('token',token,max_age=360000)
+        return res
     except Exception as e:
         print(e)
         return jsonify({"success":False, "message":"Something went wrong!"}) , 500
 
 
-@class_bp.route("/<id>",methods=['GET'])
-@jwt_required
-def get_class(id,userdata):
-    object_id = ObjectId(id)
-    user_ObjectId = ObjectId(userdata['userid'])
+@class_bp.route("/<class_id>",methods=['GET'])
+@member_require
+def get_class(class_id,userdata):
+    object_id = ObjectId(class_id)
     try:
-        class_ = classes.find_one(object_id)
+        class_ = classes.find_one(object_id,{'_id':1,'name':1,'subject':1,'description':1,'key':1,'number_of_students':1,'creater':1})
         class_['_id'] = str(class_['_id'])
-        if userdata['userid'] in class_['students']:
-            return jsonify({"succes":True,"class":class_,"role":"student"})
-        elif userdata['userid'] in class_['teachers']:
-            return jsonify({"succes":True,"class":class_,"role":"teacher"})
-        else:
-            return jsonify({"succes":False,"message":"access denied"}) , 400
+        return jsonify({"succes":True,"class":class_})
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}) , 500
+
+@class_bp.route("/peoples/:<class_id>",methods=['GET'])
+@member_require
+def get_peoples(class_id):
+    pipeline=[
+        {
+            '$match'
+        }
+    ]
 
 @class_bp.route("/join",methods=['POST'])
 @jwt_required
@@ -53,7 +62,7 @@ def join_class(userdata):
         found_class = classes.find_one(data)
         if not found_class:
             return jsonify({"success":False,"message":"class not found"})
-        users.update_one({"_id":userObjectId},{"$push":{"classes":found_class['_id']}})
+        users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
         classes.update_one({"_id":found_class['_id']},{"$push":{"students":userdata['userid']},"$inc":{"number_of_students":1}})
     except Exception as e :
         print(e)
@@ -69,10 +78,17 @@ def get_classes(userdata):
         "$match": {"_id": ObjectId(userdata['userid'])}  # Match the specific user
     },
     {
+        "$set": {
+            "combined_roles": {
+                "$concatArrays": ["$student", "$teacher"]
+            }
+        }
+    },
+    {
         "$addFields": {
-            "classes": {
+            "combined_roles": {
                 "$map": {
-                    "input": "$classes",
+                    "input": "$combined_roles",
                     "as": "class_id",
                     "in": {"$toObjectId": "$$class_id"}  # Convert class IDs to ObjectId
                 }
@@ -82,7 +98,7 @@ def get_classes(userdata):
     {
         "$lookup": {
             "from": "classes",
-            "localField": "classes",
+            "localField": "combined_roles",
             "foreignField": "_id",
             "as": "class_details"
         }
@@ -104,8 +120,12 @@ def get_classes(userdata):
 
     try:
         class_details = users.aggregate(pipeline)
-    except:
+        print(class_details)
+        return jsonify({"success":True,"classes":json_util.loads(json_util.dumps(list(class_details)))})
+    except Exception as e:
+        print(e)
         return jsonify({"success":False,"message":"Something went wrong"}),500
-    return jsonify({"success":True,"classes":json_util.loads(json_util.dumps(list(class_details)))})
 
-    
+   
+
+
