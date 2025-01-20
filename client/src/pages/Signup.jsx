@@ -1,5 +1,6 @@
 import axios from "axios"
 import { useNavigate ,Link} from "react-router"
+import { SERVER_URL } from "../config/SERVER_URL"
 import useStore from "../store/store"
 
 function Signup() {
@@ -13,7 +14,7 @@ function Signup() {
       console.log("Password not matching!")
     }
     axios
-      .post("http://localhost:5000/register", {
+      .post(SERVER_URL+"/register", {
         username: e.target.username.value,
         password: e.target.password.value,
         email: e.target.email.value

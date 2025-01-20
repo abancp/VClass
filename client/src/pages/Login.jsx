@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useNavigate,Link } from "react-router"
 import Header from "../components/main/Header"
+import { SERVER_URL } from "../config/SERVER_URL"
 import useStore from "../store/store"
 
 function Login() {
@@ -11,7 +12,7 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    axios.post("http://localhost:5000/login",
+    axios.post(SERVER_URL+"/login",
       {
         email: e.target.email.value,
         password: e.target.password.value

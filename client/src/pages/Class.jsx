@@ -5,6 +5,7 @@ import Header from '../components/main/Header'
 import NoticeBoard from '../components/main/NoticeBoard'
 import Sidebar from '../components/main/Sidebar'
 import CreateWorkPopup from '../components/popup/CreateWorkPopup'
+import { SERVER_URL } from '../config/SERVER_URL'
 
 function ClassPage() {
   const [classData, setClassData] = useState({})
@@ -15,7 +16,7 @@ function ClassPage() {
   const [showWorkPopup, setShowWorkPopup] = useState(false)
 
   useEffect(() => {
-    axios.get("http://localhost:5000/class/" + id, { withCredentials: true })
+    axios.get(SERVER_URL+"/class/" + id, { withCredentials: true })
       .then(({ data }) => {
         console.log(data)
         setClassData(data.class)
