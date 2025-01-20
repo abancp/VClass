@@ -1,5 +1,7 @@
 from pymongo import MongoClient
-client = MongoClient("mongodb://localhost:27017")
+import os
+
+client = MongoClient(os.getenv("MONGO_URI"))
 db = client['VClass']
 users = db['users']
 classes = db['classes']

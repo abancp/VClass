@@ -56,9 +56,9 @@ def login():
 
     print(user) 
     roles = {}
-    for class_id in user['teachers']:
+    for class_id in user['teacher']:
         roles[class_id] = 'teacher'
-    for class_id in user['students']:
+    for class_id in user['student']:
         roles[class_id] = 'student'
     #create jwt token
     token = jwt.encode({

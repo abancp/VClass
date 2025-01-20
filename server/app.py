@@ -4,10 +4,19 @@ from flask_cors import CORS
 from config.mongodb import client 
 from blueprints.auth import auth_bp
 from blueprints.class_bp import class_bp
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app,origins=["http://localhost:3000"],allow_headers="*",supports_credentials=True)
-app.config['JWT_SECRET'] =  "JA^&%&D%ASB&*ASvssdfhhAnbhsfu6a56sf8fhaO^!@#$%$"
+CORS(
+    app,
+    origins=["http://localhost:3000","vclass-xi.vercel.app"],
+    allow_headers="*",
+    supports_credentials=True
+)
+app.config['JWT_SECRET'] = os.getenv("JWT_SECRET")
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(class_bp,url_prefix='/class')

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState ,useRef} from 'react'
 import { Link } from "react-router"
 import useStore from '../../store/store'
 
@@ -12,7 +12,7 @@ function Header({ sub, handleMenuClick, forWhat }) {
     }
   }, [isLogin, fetchUserdata])
   return (
-    <header className='w-full border-b border-dark top-0 left-0 fixed z-[1000] text-light px-4 py-2 justify-between items-center gap bg-secondery gap-3 flex'>
+    <header className=' h-[3.5rem] w-full border-b border-dark top-0 left-0 fixed z-[100] text-light px-4 py-2 justify-between items-center gap bg-secondery gap-3 flex'>
       <div className='flex gap-3 '>
         {forWhat === "class" &&
           <svg onClick={handleMenuClick} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className=" cursor-pointer bi bi-list" viewBox="0 0 16 16">

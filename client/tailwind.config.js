@@ -22,7 +22,7 @@ module.exports = {
         paint : ["Finger Paint", "serif"] 
       },
       padding:{
-        header : '3.04rem'
+        header : '3.5rem'
       }
     },
   },
