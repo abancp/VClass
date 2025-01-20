@@ -4,3 +4,4 @@ pyjwt
 gunicorn
 flask_cors
 bcrypt
+nanoid
