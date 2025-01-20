@@ -34,7 +34,7 @@ def create_class(userdata):
 
 @class_bp.route("/<class_id>",methods=['GET'])
 @member_require
-def get_class(class_id):
+def get_class(class_id,userdata):
     try:
         class_ = classes.find_one({"_id":ObjectId(class_id)},{'_id':1,'name':1,'subject':1,'description':1,'key':1,'number_of_students':1,'creater':1})
         class_['_id'] = str(class_['_id'])
@@ -42,7 +42,7 @@ def get_class(class_id):
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}) , 500
-
+"""
 @class_bp.route("/peoples/:<class_id>",methods=['GET'])
 @member_require
 def get_peoples(class_id):
@@ -51,6 +51,7 @@ def get_peoples(class_id):
             '$match'
         }
     ]
+    """
 
 @class_bp.route("/join",methods=['POST'])
 @jwt_required
