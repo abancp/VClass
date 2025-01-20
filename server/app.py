@@ -12,7 +12,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(
     app,
-    origins=["http://localhost:3000","vclass-xi.vercel.app"],
+    origins=["http://localhost:3000","https://vclass-xi.vercel.app"],
     allow_headers="*",
     supports_credentials=True
 )
