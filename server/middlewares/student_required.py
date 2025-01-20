@@ -1,6 +1,7 @@
 import jwt
 from functools import wraps
 from flask import request,jsonify,current_app
+import os
 
 def student_require(f):
     @wraps(f)
@@ -10,7 +11,7 @@ def student_require(f):
         if not token or not class_id:
             return jsonify({"success":False,"message":"Auth failed"}) , 401
         try:
-            data = jwt.decode(token,current_app.config['JWT_SECRET'],algorithms=['HS256'])
+            data = jwt.decode(token,str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
             print(data)
             if not data['roles'][class_id] == "student":
                 return jsonify({"success":False,"message":"Auth failed"}) , 401

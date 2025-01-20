@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 from flask import Blueprint,request,jsonify,make_response,current_app
 import jwt
 from config.mongodb import users
+import os
 
 auth_bp = Blueprint('auth',__name__)
 
@@ -66,7 +67,7 @@ def login():
         "username":user['username'],
         "email":user['email'],
         "roles":roles
-    },current_app.config['JWT_SECRET'],algorithm='HS256')
+    },str(os.getenv("JWT_SECRET")),algorithm='HS256')
 
     #set cookie and response
     res = make_response(jsonify({"message":"user registered successfully : "+user['username'],"username":user['username']}))
@@ -79,7 +80,7 @@ def get_userdata():
     if not token:
         return jsonify({"success":False}) , 401
     try:
-        data = jwt.decode(str(token),current_app.config['JWT_SECRET'],algorithms=['HS256'])
+        data = jwt.decode(str(token),str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
         user = users.find_one({"_id":ObjectId(data['userid'])})
         if not user:
             return jsonify({"success":False,"message":"user not found"})
