@@ -3,3 +3,4 @@ pymongo
 pyjwt
 gunicorn
 flask_cors
+bcrypt
