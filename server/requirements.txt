@@ -2,3 +2,4 @@ flask
 pymongo
 pyjwt
 gunicorn
+flask_cors
