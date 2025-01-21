@@ -42,16 +42,42 @@ def get_class(class_id,userdata):
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}) , 500
-"""
+
 @class_bp.route("/peoples/:<class_id>",methods=['GET'])
 @member_require
 def get_peoples(class_id):
-    pipeline=[
-        {
-            '$match'
+
+   pipeline = [
+    {"$match": {"_id": ObjectId(class_id)}},
+    {
+        "$addFields": {
+            "students": {
+                "$map": {
+                    "input": "$students",
+                    "in": {"$toObjectId": "$$this"}
+                }
+            },
+            "teachers": {
+                "$map": {
+                    "input": "$teachers",
+                    "in": {"$toObjectId": "$$this"}
+                }
+            }
         }
+    },
+    {"$unwind": "$students"},
+    {"$lookup": {"from": "users", "localField": "students", "foreignField": "_id", "as": "studentDetails"}},
+    {"$unwind": "$studentDetails"},
+    {"$group": {"_id": "$_id", "students": {"$push": "$studentDetails.name"}, "teachers": {"$first": "$teachers"}}},
+    {"$unwind": "$teachers"},
+    {"$lookup": {"from": "users", "localField": "teachers", "foreignField": "_id", "as": "teacherDetails"}},
+    {"$unwind": "$teacherDetails"},
+    {"$group": {"_id": "$_id", "students": {"$first": "$students"}, "teachers": {"$push": "$teacherDetails.name"}}},
+    {"$project": {"_id": 0, "students": 1, "teachers": 1}}
     ]
-    """
+    peoples = classes.aggregate(pipeline)
+    return jsonify({"peoples":peoples,"success":True})
+
 
 @class_bp.route("/join",methods=['POST'])
 @jwt_required
@@ -63,7 +89,7 @@ def join_class(userdata):
         if not found_class:
             return jsonify({"success":False,"message":"class not found"})
         users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
-        classes.update_one({"_id":found_class['_id']},{"$push":{"students":userdata['userid']},"$inc":{"number_of_students":1}})
+        classes.update_one({"_id":found_class['_id']},{"$push":{"students":str(userdata['userid'])},"$inc":{"number_of_students":1}})
     except Exception as e :
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}),500
