@@ -75,7 +75,7 @@ def get_peoples(class_id,userdata):
     {"$project": {"_id": 0, "students": 1, "teachers": 1}}
     ]
     peoples = classes.aggregate(pipeline)
-    return jsonify({"peoples":peoples,"success":True})
+    return jsonify({"peoples":json_util.loads(json_util.dumps(list(peoples))),"success":True})
 
 
 @class_bp.route("/join",methods=['POST'])
