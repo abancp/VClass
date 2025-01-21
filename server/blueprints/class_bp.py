@@ -87,7 +87,7 @@ def join_class(userdata):
         found_class = classes.find_one(data)
         if not found_class:
             return jsonify({"success":False,"message":"class not found"})
-        users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
+        users.update_one({"_id":userObjectId},{"$push":{"student":str(found_class['_id'])}})
         classes.update_one({"_id":found_class['_id']},{"$push":{"students":str(userdata['userid'])},"$inc":{"number_of_students":1}})
     except Exception as e :
         print(e)
