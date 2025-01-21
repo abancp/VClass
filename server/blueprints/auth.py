@@ -38,7 +38,7 @@ def register():
     #set cookie and response
     res = make_response(jsonify({"message":"user registered successfully : "+username}))
     print(token)
-    res.set_cookie('token',token,max_age=360000)
+    res.set_cookie('token',token,max_age=360000,secure=True,httponly=True,samesite="None" )
     return res
 
 @auth_bp.route("/login",methods=['POST'])
@@ -71,7 +71,7 @@ def login():
 
     #set cookie and response
     res = make_response(jsonify({"message":"user registered successfully : "+user['username'],"username":user['username']}))
-    res.set_cookie('token',token,max_age=360000)
+    res.set_cookie('token',token,max_age=360000,secure=True,httponly=True,samesite="None" )
     return res
 
 @auth_bp.get("/get-userdata")
