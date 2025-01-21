@@ -14,12 +14,18 @@ function ClassPage() {
   const [selected, setSelected] = useState('class')
   const [typedAnnounce, setTypedAnnounce] = useState()
   const [showWorkPopup, setShowWorkPopup] = useState(false)
+  const [peoples,setPeoples] = useState([])
 
   useEffect(() => {
     axios.get(SERVER_URL+"/class/" + id, { withCredentials: true })
       .then(({ data }) => {
         console.log(data)
         setClassData(data.class)
+      })
+    axios.get(SERVER_URL+"/peoples/"+id,{ withCredentials: true })
+      .then(({data})=>{
+        console.log(data)
+        setPeoples(data.peoples)
       })
   }, [id])
 
