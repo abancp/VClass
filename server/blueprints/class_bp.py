@@ -47,33 +47,65 @@ def get_class(class_id,userdata):
 @member_require
 def get_peoples(class_id,userdata):
     pipeline = [
-    {"$match": {"_id": ObjectId(class_id)}},
-    {
-        "$addFields": {
-            "students": {
-                "$map": {
-                    "input": "$students",
-                    "in": {"$toObjectId": "$$this"}
-                }
-            },
-            "teachers": {
-                "$map": {
-                    "input": "$teachers",
-                    "in": {"$toObjectId": "$$this"}
-                }
-            }
+  {
+    "$match": {
+      "_id": { "$oid": class_id}
+    }
+  },
+  {
+    "$addFields": {
+      "students": {
+        "$map": {
+          "input": "$students",
+          "as": "studentId",
+          "in": { "$toObjectId": "$$studentId" }
         }
-    },
-    {"$unwind": "$students"},
-    {"$lookup": {"from": "users", "localField": "students", "foreignField": "_id", "as": "studentDetails"}},
-    {"$unwind": "$studentDetails"},
-    {"$group": {"_id": "$_id", "students": {"$push": "$studentDetails.name"}, "teachers": {"$first": "$teachers"}}},
-    {"$unwind": "$teachers"},
-    {"$lookup": {"from": "users", "localField": "teachers", "foreignField": "_id", "as": "teacherDetails"}},
-    {"$unwind": "$teacherDetails"},
-    {"$group": {"_id": "$_id", "students": {"$first": "$students"}, "teachers": {"$push": "$teacherDetails.name"}}},
-    {"$project": {"_id": 0, "students": 1, "teachers": 1}}
-    ]
+      },
+      "teachers": {
+        "$map": {
+          "input": "$teachers",
+          "as": "teacherId",
+          "in": { "$toObjectId": "$$teacherId" }
+        }
+      }
+    }
+  },
+  {
+    "$lookup": {
+      "from": "users",
+      "localField": "students",
+      "foreignField": "_id",
+      "as": "studentDetails"
+    }
+  },
+  {
+    "$lookup": {
+      "from": "users",
+      "localField": "teachers",
+      "foreignField": "_id",
+      "as": "teacherDetails"
+    }
+  },
+  {
+    "$project": {
+      "_id": 0,
+      "students": {
+        "$map": {
+          "input": "$studentDetails",
+          "as": "student",
+          "in": "$$student.username"
+        }
+      },
+      "teachers": {
+        "$map": {
+          "input": "$teacherDetails",
+          "as": "teacher",
+          "in": "$$teacher.username"
+        }
+      }
+    }
+  }
+]
     peoples = classes.aggregate(pipeline)
     return jsonify({"peoples":json_util.loads(json_util.dumps(list(peoples))),"success":True})
 
