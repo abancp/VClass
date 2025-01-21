@@ -1,16 +1,20 @@
-import React, { useEffect, useState ,useRef} from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Link } from "react-router"
 import useStore from '../../store/store'
 
 function Header({ sub, handleMenuClick, forWhat }) {
+
   const isLogin = useStore((state) => state.isLogin)
   const username = useStore((state) => state.username)
   const fetchUserdata = useStore((state) => state.fetchUserdata)
+
   useEffect(() => {
+    console.log(isLogin)
     if (!isLogin) {
       fetchUserdata()
     }
   }, [isLogin, fetchUserdata])
+
   return (
     <header className=' h-[3.5rem] w-full border-b border-dark top-0 left-0 fixed z-[100] text-light px-4 py-2 justify-between items-center gap bg-secondery gap-3 flex'>
       <div className='flex gap-3 '>
@@ -19,7 +23,7 @@ function Header({ sub, handleMenuClick, forWhat }) {
             <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
           </svg>
         }
-        <h1 className='text-xl font-bold'><Link to="/" >VClass</Link> { sub&& "/"} {sub}</h1>
+        <h1 className='text-xl font-bold'><Link to="/" >VClass</Link> {sub && "/"} {sub}</h1>
       </div>
       <div className="flex gap-3">
         {(forWhat === "home" && isLogin) && <Link to="/create/class">
@@ -40,6 +44,7 @@ function Header({ sub, handleMenuClick, forWhat }) {
       </div>
     </header>
   )
+
 }
 
 export default Header

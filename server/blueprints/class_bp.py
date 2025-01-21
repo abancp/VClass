@@ -43,7 +43,7 @@ def get_class(class_id,userdata):
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}) , 500
 
-@class_bp.route("/peoples/:<class_id>",methods=['GET'])
+@class_bp.route("/peoples/<class_id>",methods=['GET'])
 @member_require
 def get_peoples(class_id):
     pipeline = [

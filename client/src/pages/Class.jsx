@@ -14,16 +14,16 @@ function ClassPage() {
   const [selected, setSelected] = useState('class')
   const [typedAnnounce, setTypedAnnounce] = useState()
   const [showWorkPopup, setShowWorkPopup] = useState(false)
-  const [peoples,setPeoples] = useState({students:[],teachers:[]})
+  const [peoples, setPeoples] = useState({ students: [], teachers: [] })
 
   useEffect(() => {
-    axios.get(SERVER_URL+"/class/" + id, { withCredentials: true })
+    axios.get(SERVER_URL + "/class/" + id, { withCredentials: true })
       .then(({ data }) => {
         console.log(data)
         setClassData(data.class)
       })
-    axios.get(SERVER_URL+"/peoples/"+id,{ withCredentials: true })
-      .then(({data})=>{
+    axios.get(SERVER_URL + "/class/peoples/" + id, { withCredentials: true })
+      .then(({ data }) => {
         console.log(data)
         setPeoples(data.peoples)
       })
@@ -78,13 +78,6 @@ function ClassPage() {
         selected === 'works' &&
         <div className='w-full flex flex-col gap-2 justify-between p-3 min-h-[calc(100vh-3.5rem)] '>
           <div className='h-[calc(100vh-9.9rem)] p-3 overflow-y-scroll  w-full'>
-            <div>sksfkjkshdfkas</div>
-            <div>sksfkjkshdfkas</div>
-            <div>sksfkjkshdfkas</div>
-            <div>sksfkjkshdfkas</div>
-            <div>sksfkjkshdfkas</div>
-            <div>sksfkjkshdfkas</div>
-            <div>sksfkjkshdfkas</div>
             <div>sksfkjkshdfkas</div>
             <div>sksfkjkshdfkas</div>
           </div>
