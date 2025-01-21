@@ -49,8 +49,7 @@ def get_peoples(class_id,userdata):
     pipeline = [
   {
     "$match": {
-      "_id": { "$oid": class_id}
-    }
+      "_id": ObjectId(class_id)    }
   },
   {
     "$addFields": {
