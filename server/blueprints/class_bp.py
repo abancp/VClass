@@ -46,8 +46,7 @@ def get_class(class_id,userdata):
 @class_bp.route("/peoples/:<class_id>",methods=['GET'])
 @member_require
 def get_peoples(class_id):
-
-   pipeline = [
+    pipeline = [
     {"$match": {"_id": ObjectId(class_id)}},
     {
         "$addFields": {
