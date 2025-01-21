@@ -33,7 +33,7 @@ def register():
         "username":username,
         "email":email,
         "roles":{},
-    },current_app.config['JWT_SECRET'],algorithm='HS256')
+    },str(os.getenv('JWT_SECRET')),algorithm='HS256')
 
     #set cookie and response
     res = make_response(jsonify({"message":"user registered successfully : "+username}))
