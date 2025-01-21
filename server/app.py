@@ -13,10 +13,9 @@ app = Flask(__name__)
 CORS(
     app,
     origins=["http://localhost:3000","https://vclass-xi.vercel.app"],
-    allow_headers="*",
+    allow_headers=["*"],
     supports_credentials=True
 )
-app.config['JWT_SECRET'] = os.getenv("JWT_SECRET")
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(class_bp,url_prefix='/class')
