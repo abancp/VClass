@@ -28,14 +28,8 @@ function ClassPage() {
         setClassData(data.class)
       })
 
-    if (selected === "peoples" && peoples.length === 0) {
-      axios.get(SERVER_URL + "/class/peoples/" + id, { withCredentials: true })
-        .then(({ data }) => {
-          console.log(data)
-          setPeoples(data.peoples)
-        })
-    }
-  }, [id, selected, peoples])
+
+  }, [id])
 
   useEffect(() => {
     if (selected !== "works") return
@@ -54,6 +48,17 @@ function ClassPage() {
       }
     })
   }, [annSkip, id])
+  useEffect(() => {
+    if (selected === "peoples" && peoples?.teachers?.length === 0) {
+      axios.get(SERVER_URL + "/class/peoples/" + id, { withCredentials: true })
+        .then(({ data }) => {
+          console.log(data)
+          setPeoples(data.peoples)
+        })
+    }
+
+  }, [selected,id])
+
 
   const handleWorksScroll = (e) => {
     const { offsetHeight, scrollTop, scrollHeight } = e.target
@@ -84,13 +89,13 @@ function ClassPage() {
 
 
   return (
-    <div   className={`w-full flex-grow text-light pt-header ${showSidebar ? "pl-[15rem]" : "pl-[3rem]"} min-h-screen bg-dark transition-all duration-300`}>
+    <div className={`w-full flex-grow text-light pt-header ${showSidebar ? "pl-[15rem]" : "pl-[3rem]"} min-h-screen bg-dark transition-all duration-300`}>
       <Header sub={classData.name} forWhat="class" handleMenuClick={() => { setShowSidebar((prev) => !prev) }} />
       {showWorkPopup && <CreateWorkPopup id={id} handleClose={() => { setShowWorkPopup(false) }} />}
       <Sidebar selected={selected} handleChange={(type) => setSelected(type)} full={showSidebar} forWhat={"class"} classname={classData.name} />
       {selected === "class" &&
         <main className='p-4 flex gap-8 justify-center items-start'>
-          <div  className='w-[15rem] p-3 rounded-md flex flex-col gap-3 h-[9.4rem] border border-tersiory/50'>
+          <div className='w-[15rem] p-3 rounded-md flex flex-col gap-3 h-[9.4rem] border border-tersiory/50'>
             <div className='flex flex-col justify-center items-start justify-between'>
               <h1 className=" text-lg font-semibold">Class Key</h1>
               <div className='flex items-center gap-2 text-tersiory cursor-pointer'>
@@ -102,7 +107,7 @@ function ClassPage() {
             </div>
             <h1 className='text-2xl bg-secondery rounded-md py-3 w-full text-center font-bold'>{classData.key}</h1>
           </div>
-          <div  onScroll={handleAnnsScroll}  className='w-[48rem] flex flex-col gap-3'>
+          <div onScroll={handleAnnsScroll} className='w-[48rem] flex flex-col gap-3'>
             <NoticeBoard notices={[{ notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" },
             { notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" }
             ]} />
@@ -118,7 +123,16 @@ function ClassPage() {
             {
               anns.map((ann) => (
                 <div className=' flex flex-col gap-1 w-full rounded-md  border border-tersiory/50  p-4'>
-                  <h1 className='font-semibold' >{ann.user_id}<span className='ml-2 opacity-90 text-sm font-thin'>{ann.time}</span> </h1>
+                  <h1 className='font-semibold flex justify-between' >{ann.user_id}<span className='ml-2 opacity-90 text-sm font-thin'>{new Date(ann.time).toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                  })}
+                  </span> </h1>
                   {ann.announce}
                 </div>
               ))
