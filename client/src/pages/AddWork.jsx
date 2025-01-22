@@ -46,14 +46,16 @@ function AddWork() {
   }
   return (
     <div className='w-full text-light  h-full bg-dark pt-header min-h-screen'>
-      <Header sub="Add Assignment" />
+      <Header forWhat="popup" sub="Add Assignment" />
       <form onSubmit={handleAssign} className='h-full p-3 flex gap-3'>
         <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
           <div>
-            <h1 className='ml-2 font-bold'>Title</h1>
-            <input name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' /></div>
+            <h1 className='ml-2 font-bold'>Title  <span className='text-red-600'>*</span> </h1>
+            <input required name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' />
+
+          </div>
           <div>
-           <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *BOLD* __underlin__ _italic_ **striong**</span></h1>
+           <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *<i className='font-normal'>italic</i>* _<b>strong</b>_ </span></h1>
             <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-full min-h-[7rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
           </div>
 
