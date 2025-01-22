@@ -6,7 +6,7 @@ from config.mongodb import classes,users
 from middlewares.jwt_protect import jwt_required
 from nanoid import generate
 from bson import json_util
-from middlewares.memeber_required import member_require
+from middlewares.memeber_required import member_required
 class_bp = Blueprint('class',__name__)
 
 @class_bp.route("/",methods=['POST'])
@@ -33,7 +33,7 @@ def create_class(userdata):
 
 
 @class_bp.route("/<class_id>",methods=['GET'])
-@member_require
+@member_required
 def get_class(class_id,userdata):
     try:
         class_ = classes.find_one({"_id":ObjectId(class_id)},{'_id':1,'name':1,'subject':1,'description':1,'key':1,'number_of_students':1,'creater':1})
@@ -44,7 +44,7 @@ def get_class(class_id,userdata):
         return jsonify({"success":False,"message":"Something went wrong!"}) , 500
 
 @class_bp.route("/peoples/<class_id>",methods=['GET'])
-@member_require
+@member_required
 def get_peoples(class_id,userdata):
     pipeline = [
   {
@@ -106,7 +106,7 @@ def get_peoples(class_id,userdata):
   }
 ]
     peoples = classes.aggregate(pipeline)
-    return jsonify({"peoples":json_util.loads(json_util.dumps(peoples)),"success":True})
+    return jsonify({"peoples":json_util.loads(json_util.dumps(peoples))[0],"success":True})
 
 
 @class_bp.route("/join",methods=['POST'])
