@@ -1,5 +1,6 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 import Header from '../components/main/Header'
@@ -32,7 +33,8 @@ function ClassPage() {
   }, [id])
 
   useEffect(() => {
-    if (selected !== "works") return
+    if (selected !== "works" 
+    ) return
     axios.get(SERVER_URL + "/work/works/" + id + "?skip=" + worksSkip, { withCredentials: true }).then(({ data }) => {
       if (data.success) {
         console.log("Fetched works")
@@ -123,7 +125,7 @@ function ClassPage() {
             {
               anns.map((ann) => (
                 <div className=' flex flex-col gap-1 w-full rounded-md  border border-tersiory/50  p-4'>
-                  <h1 className='font-semibold flex justify-between' >{ann.user_id}<span className='ml-2 opacity-90 text-sm font-thin'>{new Date(ann.time).toLocaleString('en-US', {
+                  <h1 className='font-semibold flex justify-between' >{ann.username}<span className='ml-2 opacity-90 text-sm font-thin'>{new Date(ann.time).toLocaleString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'numeric',
@@ -150,11 +152,19 @@ function ClassPage() {
               works.map((work) => (
                 <div className='rounded-md w-full p-2 border border-tersiory/50 bg-secondery/50'>
                   <h1 className='font-semibold text-lg'>{work.title}</h1>
-                  <h3 className=''>{work.instruction}</h3>
+                  <h3 className=''><ReactMarkdown>{work.instruction}</ReactMarkdown></h3>
                   <div className='flex gap-3 mt-1 px-2 text-tersiory/90 '>
-                    <h6 className='font-light text-[14px]'>Aban Muhammed C P</h6>
-                    <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>assignment</div>
-                    <h6 className='font-light text-[14px]' >12/2/2025 12:20</h6>
+                    <h6 className='font-light text-[14px]'>{work.teacher_name}</h6>
+                    <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>{work.type}</div>
+                    <h6 className='font-light text-[14px]' >{new Date(work.time).toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                  })}</h6>
                   </div>
                 </div>
               ))
