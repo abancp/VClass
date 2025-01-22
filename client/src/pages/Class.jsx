@@ -152,8 +152,7 @@ function ClassPage() {
               works.map((work) => (
                 <div className='rounded-md w-full p-2 border border-tersiory/50 bg-secondery/50'>
                   <h1 className='font-semibold text-lg'>{work.title}</h1>
-                  <h3 className=''><ReactMarkdown>{work.instruction}</ReactMarkdown></h3>
-                  <div className='flex gap-3 mt-1 px-2 text-tersiory/90 '>
+                  <div className='flex gap-3 mt-1  text-tersiory/90 '>
                     <h6 className='font-light text-[14px]'>{work.teacher_name}</h6>
                     <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>{work.type}</div>
                     <h6 className='font-light text-[14px]' >{new Date(work.time).toLocaleString('en-US', {
