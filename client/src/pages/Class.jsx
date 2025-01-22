@@ -1,6 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
+import { toast } from 'sonner'
 import Header from '../components/main/Header'
 import NoticeBoard from '../components/main/NoticeBoard'
 import Sidebar from '../components/main/Sidebar'
@@ -14,6 +15,8 @@ function ClassPage() {
   const [selected, setSelected] = useState('class')
   const [typedAnnounce, setTypedAnnounce] = useState()
   const [showWorkPopup, setShowWorkPopup] = useState(false)
+  const [works, setWorks] = useState([])
+  const [worksSkip, setWorksSkip] = useState(0)
   const [peoples, setPeoples] = useState({ students: [], teachers: [] })
 
   useEffect(() => {
@@ -22,12 +25,45 @@ function ClassPage() {
         console.log(data)
         setClassData(data.class)
       })
-    axios.get(SERVER_URL + "/class/peoples/" + id, { withCredentials: true })
+
+    if (selected === "peoples" && peoples.length === 0) {
+      axios.get(SERVER_URL + "/class/peoples/" + id, { withCredentials: true })
+        .then(({ data }) => {
+          console.log(data)
+          setPeoples(data.peoples)
+        })
+    }
+  }, [id, selected, peoples])
+
+  useEffect(() => {
+    if (selected !== "works") return
+    axios.get(SERVER_URL + "/work/works/" + id + "/" + worksSkip, { withCredentials: true }).then(({ data }) => {
+      if (data.success) {
+        setWorks((p) => [...p, ...data.works])
+      }
+    })
+  }, [worksSkip, id, selected])
+
+  const handleWorksScroll = (e) => {
+    const { offsetHeight, scrollTop, scrollHeight } = e.target
+    console.log(offsetHeight, scrollTop, scrollHeight)
+    if (offsetHeight + scrollTop === scrollHeight) {
+      setWorksSkip(works.length)
+    }
+  }
+
+  const handleAnnounce = (e) => {
+    e.preventDefault()
+    axios.post(SERVER_URL + "/ann",
+      { announce: typedAnnounce, class_id: id }, { withCredentials: true })
       .then(({ data }) => {
-        console.log(data)
-        setPeoples(data.peoples)
+        if (data.success) {
+          setTypedAnnounce("")
+          console.log("Announced")
+        }
       })
-  }, [id])
+  }
+
 
   return (
     <div className={`w-full flex-grow text-light pt-header ${showSidebar ? "pl-[15rem]" : "pl-[3rem]"} min-h-screen bg-dark transition-all duration-300`}>
@@ -52,13 +88,14 @@ function ClassPage() {
             <NoticeBoard notices={[{ notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" },
             { notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" }
             ]} />
-            <div className='bg-secondery flex gap-1 justify-center items-center w-full rounded-md border border-tersiory/50  p-1'>
-              <input value={typedAnnounce} onChange={(e) => { setTypedAnnounce(e.target.value) }} placeholder='Type to announce something ..' className='w-full bg-transparent/50 border rounded-md p-1 focus:outline-none border-tersiory/50' />
-
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className={`bi bi-send rounded-md  cursor-pointer ${typedAnnounce ? "text-tersiory/70 hover:text-tersiory" : "text-dark "} duration-300 `} viewBox="0 0 16 16">
-                <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
-              </svg>
-            </div>
+            <form onSubmit={handleAnnounce} className='bg-secondery flex gap-1 justify-center items-center w-full rounded-md border border-tersiory/50  p-1'>
+              <input name="announce" value={typedAnnounce} onChange={(e) => { setTypedAnnounce(e.target.value) }} placeholder='Type to announce something ..' className='w-full bg-transparent/50 border rounded-md p-1 focus:outline-none border-tersiory/50' />
+              <button type='submit' className=''>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className={`bi bi-send rounded-md  cursor-pointer ${typedAnnounce ? "text-tersiory/70 hover:text-tersiory" : "text-dark "} duration-300 `} viewBox="0 0 16 16">
+                  <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
+                </svg>
+              </button>
+            </form>
 
             <div className=' flex flex-col gap-1 w-full rounded-md border border-tersiory/50  p-4'>
               <h1 className='font-semibold' >Aban Muhammed C P <span className='ml-2 opacity-90 text-sm font-thin'>8:00pm yesterday</span> </h1>
@@ -77,9 +114,20 @@ function ClassPage() {
       {
         selected === 'works' &&
         <div className='w-full flex flex-col gap-2 justify-between p-3 min-h-[calc(100vh-3.5rem)] '>
-          <div className='h-[calc(100vh-9.9rem)] p-3 overflow-y-scroll  w-full'>
-            <div>sksfkjkshdfkas</div>
-            <div>sksfkjkshdfkas</div>
+          <div onScroll={handleWorksScroll} className='gap-3 flex flex-col h-[calc(100vh-9.9rem)] p-3 overflow-y-scroll  w-full'>
+            {
+              works.map((work) => (
+                <div className='rounded-md w-full p-2 border border-tersiory/50 bg-secondery/50'>
+                  <h1 className='font-semibold text-lg'>{work.title}</h1>
+                  <h3 className=''>{work.instruction}</h3>
+                  <div className='flex gap-3 mt-1 px-2 text-tersiory/90 '>
+                    <h6 className='font-light text-[14px]'>Aban Muhammed C P</h6>
+                    <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>assignment</div>
+                    <h6 className='font-light text-[14px]' >12/2/2025 12:20</h6>
+                  </div>
+                </div>
+              ))
+            }
           </div>
           <div onClick={() => { setShowWorkPopup((p) => (!p)) }} className='cursor-pointer hover:text-tersiory duration-300 h-[4rem] gap-3 rounded-md w-full flex bg-secondery items-center justify-center'>
             <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
@@ -97,13 +145,13 @@ function ClassPage() {
           <h1 className='text-x py-2 rounded-md border border-tersiory px-4 font-bold'>Teachers</h1>
           {
             peoples?.teachers?.map((teacher) => (
-              <div className='py-2 ml-4 px-4 text-lg rounded-md bg-secondery'>{teacher}</div>
+              <div className='py-2 w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{teacher}</div>
             ))
           }
-          <h1 className='text-x py-2 rounded-md border border-tersiory px-4 font-bold'>Students</h1>
+          <h1 className='text-x  py-2 rounded-md border border-tersiory px-4 font-bold'>Students</h1>
           {
             peoples?.students?.map((student) => (
-              <div className='py-2 ml-4 px-4 text-lg rounded-md bg-secondery'>{student}</div>
+              <div className='py-2 w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{student}</div>
             ))
           }
 
