@@ -18,6 +18,8 @@ function ClassPage() {
   const [works, setWorks] = useState([])
   const [worksSkip, setWorksSkip] = useState(0)
   const [peoples, setPeoples] = useState({ students: [], teachers: [] })
+  const [anns, setAnns] = useState([])
+  const [annSkip, setAnnSkip] = useState(0)
 
   useEffect(() => {
     axios.get(SERVER_URL + "/class/" + id, { withCredentials: true })
@@ -37,18 +39,34 @@ function ClassPage() {
 
   useEffect(() => {
     if (selected !== "works") return
-    axios.get(SERVER_URL + "/work/works/" + id + "/" + worksSkip, { withCredentials: true }).then(({ data }) => {
+    axios.get(SERVER_URL + "/work/works/" + id + "?skip=" + worksSkip, { withCredentials: true }).then(({ data }) => {
       if (data.success) {
+        console.log("Fetched works")
         setWorks((p) => [...p, ...data.works])
       }
     })
   }, [worksSkip, id, selected])
+  useEffect(() => {
+    axios.get(SERVER_URL + "/ann/anns/" + id + "?skip=" + annSkip, { withCredentials: true }).then(({ data }) => {
+      if (data.success) {
+        console.log("Fecthed anns")
+        setAnns((p) => [...p, ...data.anns])
+      }
+    })
+  }, [annSkip, id])
 
   const handleWorksScroll = (e) => {
     const { offsetHeight, scrollTop, scrollHeight } = e.target
     console.log(offsetHeight, scrollTop, scrollHeight)
     if (offsetHeight + scrollTop === scrollHeight) {
       setWorksSkip(works.length)
+    }
+  }
+  const handleAnnsScroll = (e) => {
+    const { offsetHeight, scrollTop, scrollHeight } = e.target
+    console.log(offsetHeight, scrollTop, scrollHeight)
+    if (offsetHeight + scrollTop === scrollHeight) {
+      setAnnSkip(works.length)
     }
   }
 
@@ -66,13 +84,13 @@ function ClassPage() {
 
 
   return (
-    <div className={`w-full flex-grow text-light pt-header ${showSidebar ? "pl-[15rem]" : "pl-[3rem]"} min-h-screen bg-dark transition-all duration-300`}>
+    <div   className={`w-full flex-grow text-light pt-header ${showSidebar ? "pl-[15rem]" : "pl-[3rem]"} min-h-screen bg-dark transition-all duration-300`}>
       <Header sub={classData.name} forWhat="class" handleMenuClick={() => { setShowSidebar((prev) => !prev) }} />
       {showWorkPopup && <CreateWorkPopup id={id} handleClose={() => { setShowWorkPopup(false) }} />}
       <Sidebar selected={selected} handleChange={(type) => setSelected(type)} full={showSidebar} forWhat={"class"} classname={classData.name} />
       {selected === "class" &&
         <main className='p-4 flex gap-8 justify-center items-start'>
-          <div className='w-[15rem] p-3 rounded-md flex flex-col gap-3 h-[9.4rem] border border-tersiory/50'>
+          <div  className='w-[15rem] p-3 rounded-md flex flex-col gap-3 h-[9.4rem] border border-tersiory/50'>
             <div className='flex flex-col justify-center items-start justify-between'>
               <h1 className=" text-lg font-semibold">Class Key</h1>
               <div className='flex items-center gap-2 text-tersiory cursor-pointer'>
@@ -84,7 +102,7 @@ function ClassPage() {
             </div>
             <h1 className='text-2xl bg-secondery rounded-md py-3 w-full text-center font-bold'>{classData.key}</h1>
           </div>
-          <div className='w-[48rem] flex flex-col gap-3'>
+          <div  onScroll={handleAnnsScroll}  className='w-[48rem] flex flex-col gap-3'>
             <NoticeBoard notices={[{ notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" },
             { notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" }
             ]} />
@@ -97,15 +115,14 @@ function ClassPage() {
               </button>
             </form>
 
-            <div className=' flex flex-col gap-1 w-full rounded-md border border-tersiory/50  p-4'>
-              <h1 className='font-semibold' >Aban Muhammed C P <span className='ml-2 opacity-90 text-sm font-thin'>8:00pm yesterday</span> </h1>
-              <p>Submit all records tomorrow . all students need take it from</p>
-            </div>
-
-            <div className=' flex flex-col gap-1 w-full rounded-md  border border-tersiory/50  p-4'>
-              <h1 className='font-semibold' >Aban Muhammed C P <span className='ml-2 opacity-90 text-sm font-thin'>8:00pm yesterday</span> </h1>
-              Submit all records tomorrow . all students need take it from
-            </div>
+            {
+              anns.map((ann) => (
+                <div className=' flex flex-col gap-1 w-full rounded-md  border border-tersiory/50  p-4'>
+                  <h1 className='font-semibold' >{ann.user_id}<span className='ml-2 opacity-90 text-sm font-thin'>{ann.time}</span> </h1>
+                  {ann.announce}
+                </div>
+              ))
+            }
           </div>
         </main>
       }

@@ -25,7 +25,7 @@ def create_work(work_type,userdata):
 
 @work_bp.route("/works/<class_id>",methods=['GET'])
 @member_required
-def get_work(class_id,skip,userdata):
+def get_work(class_id,userdata):
     skip = request.args.get('skip',default=0,type=int)
     works_data = works.find({"class_id":class_id}).sort({"time":-1}).limit(10).skip(skip)
     return jsonify({"success":True,"works":json.loads(json_util.dumps(works_data))})
