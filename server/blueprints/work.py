@@ -14,13 +14,14 @@ def create_work(work_type,userdata):
     try:
         data = request.get_json()
         data['teacher'] = userdata['userid']
+        data['teacher_name'] = userdata['username']
         data['type'] = work_type
         data['time'] = int(datetime.datetime.now().timestamp()*1000)
         print(data)
-        result = works.insert_one(data)
+        works.insert_one(data)
         return jsonify({"success":True,"message":"Task assigned!"})
     except:
-        return jsonify({"success":False,"message":"Something went wrong!"})
+        return jsonify({"success":False,"message":"Something went wrong!"}),500
 
 
 @work_bp.route("/works/<class_id>",methods=['GET'])

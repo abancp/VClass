@@ -14,6 +14,7 @@ def create_ann(userdata):
         data = request.get_json()
         data['time'] = int(datetime.now().timestamp()*1000)
         data['user_id'] = userdata['userid']
+        data['username'] = userdata['username']
         anns.insert_one(data)
         return jsonify({"success":True,"message":"announcement created"})
     except:

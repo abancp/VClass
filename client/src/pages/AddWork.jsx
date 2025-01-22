@@ -8,7 +8,7 @@ import { SERVER_URL } from '../config/SERVER_URL';
 import { toast } from 'sonner';
 
 function AddWork() {
-  const { type,id } = useParams()
+  const { type, id } = useParams()
   const [dueDate, setDueDate] = useState(new Date())
   const handleAssign = (e) => {
     e.preventDefault()
@@ -17,10 +17,10 @@ function AddWork() {
         {
           axios.post(SERVER_URL + "/work/add/assignment",
             {
-              class_id:id,
+              class_id: id,
               title: e.target.title.value,
               instruction: e.target.instructions.value,
-              students:['*'],
+              students: ['*'],
               dueDate
 
             },
@@ -49,9 +49,14 @@ function AddWork() {
       <Header sub="Add Assignment" />
       <form onSubmit={handleAssign} className='h-full p-3 flex gap-3'>
         <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
+          <div>
+            <h1 className='ml-2 font-bold'>Title</h1>
+            <input name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' /></div>
+          <div>
+           <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *BOLD* __underlin__ _italic_ **striong**</span></h1>
+            <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-full min-h-[7rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
+          </div>
 
-          <input name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' />
-          <textarea name='instructions' placeholder='Instructions (optional)' className='w-full min-h-[12rem] h-full bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
 
         </div>
 
@@ -67,7 +72,7 @@ function AddWork() {
             <DatePicker className='bg-transparent/50 rounded-md border border-tersiory/50 p-3 text-lg text-center w-full focus:outline-none' selected={dueDate} onChange={(date) => setDueDate(date)} />
 
           </div>
-          <input type="submit" value="Assign" className='cursor-pointer border duration-300 hover:bg-tersiory bg-tersiory p-3 w-full text-center text-lg border-tersiory/50 bg-tersiory/80 text-dark rounded-md'/>
+          <input type="submit" value="Assign" className='cursor-pointer border duration-300 hover:bg-tersiory bg-tersiory p-3 w-full text-center text-lg border-tersiory/50 bg-tersiory/80 text-dark rounded-md' />
         </div>
       </form>
     </div>
