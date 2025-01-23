@@ -7,7 +7,10 @@ from middlewares.jwt_protect import jwt_required
 from nanoid import generate
 from bson import json_util
 from middlewares.memeber_required import member_required
+import os
+
 class_bp = Blueprint('class',__name__)
+
 
 @class_bp.route("/",methods=['POST'])
 @jwt_required
@@ -23,7 +26,8 @@ def create_class(userdata):
         inserted_class = classes.insert_one(data)
         users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"teacher":str(inserted_class.inserted_id)}})
         userdata['roles'][str(inserted_class.inserted_id)] = "teacher"
-        token = jwt.encode(userdata,current_app.config['JWT_SECRET'],algorithm='HS256')
+        token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
+
         res =  make_response(jsonify({"success":True,"classid":str(inserted_class.inserted_id),"message":"created class : "+data['name']}))  
         res.set_cookie('token',token,max_age=360000)
         return res
@@ -120,11 +124,14 @@ def join_class(userdata):
             return jsonify({"success":False,"message":"class not found"})
         users.update_one({"_id":userObjectId},{"$push":{"student":str(found_class['_id'])}})
         classes.update_one({"_id":found_class['_id']},{"$push":{"students":str(userdata['userid'])},"$inc":{"number_of_students":1}})
+        userdata['roles'][str(found_class['_id'])] = "student"
+        token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
+        res =  make_response(jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"}))  
+        res.set_cookie('token',token,max_age=360000)
+        return res
     except Exception as e :
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}),500
-    return jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"})
-   
 
 @class_bp.route("/classes",methods=['GET'])
 @jwt_required
