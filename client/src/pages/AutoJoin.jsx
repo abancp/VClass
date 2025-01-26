@@ -23,11 +23,11 @@ function AutoJoin() {
       } else if (status === 404) {
         toast.error("class not existing or the link is expired!")
         navigate("/")
-      } else if (data.success) {
-        toast.success("Joined to class :" +params.get("name"))
+      } else if (status === 400 && data.success) {
+        toast.success("Joined to class :" + params.get("name"))
         navigate('/class/' + data.classid)
       } else {
-
+        navigate("/")
       }
     })
 
