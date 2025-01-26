@@ -26,6 +26,7 @@ function ClassPage() {
   const [annSkip, setAnnSkip] = useState(0)
   const [workFetch, setWorkFetch] = useState(false)
   const [showQRCode, setShowQRCode] = useState(false)
+  const [annRefresh, setAnnRefresh] = useState(0)
 
 
   useEffect(() => {
@@ -48,6 +49,7 @@ function ClassPage() {
       }
     })
   }, [worksSkip, id, selected])
+
   useEffect(() => {
     axios.get(SERVER_URL + "/ann/anns/" + id + "?skip=" + annSkip, { withCredentials: true }).then(({ data }) => {
       if (data.success) {
@@ -56,6 +58,7 @@ function ClassPage() {
       }
     })
   }, [annSkip, id])
+
 
   useEffect(() => {
     if (selected === "peoples" && peoples?.teachers?.length === 0) {
@@ -67,6 +70,14 @@ function ClassPage() {
     }
   }, [selected, id])
 
+  const refetchAnns = () => {
+    axios.get(SERVER_URL + "/ann/anns/" + id + "?skip=0", { withCredentials: true }).then(({ data }) => {
+      if (data.success) {
+        setAnnSkip(0)
+        setAnns(data.anns)
+      }
+    })
+  }
 
   const handleWorksScroll = (e) => {
     const { offsetHeight, scrollTop, scrollHeight } = e.target
@@ -108,7 +119,7 @@ function ClassPage() {
       <Sidebar selected={selected} handleChange={(type) => setSelected(type)} full={showSidebar} forWhat={"class"} classname={classData.name} />
       {selected === "class" &&
         <main className='p-4 flex gap-8 justify-center items-start'>
-          <div className={`w-[15rem] transition-all ${showQRCode?"h-[24.5rem]":"h-[9.9rem]"} p-3 rounded-md flex flex-col gap-3 duration-100 border border-tersiory/50`}>
+          <div className={`w-[15rem] transition-all ${showQRCode ? "h-[24.5rem]" : "h-[9.9rem]"} p-3 rounded-md flex flex-col gap-3 duration-100 border border-tersiory/50`}>
             <div className='flex gap-2 flex-col justify-center items-start justify-between'>
               <h1 className=" text-lg font-semibold">Class Key</h1>
               <div className='flex justify-between items-center w-full'>
@@ -118,7 +129,7 @@ function ClassPage() {
                   </svg>
                   <h1 className=" text-lg font-semibold">  copy invite link</h1>
                 </div>
-                <svg onClick={()=>{setShowQRCode((p)=>!p)}} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className={`bi bi-qr-code duration-300 text-tersiory cursor-pointer rounded-md p-1  ${showQRCode?"bg-secondery":"bg-transparent"} hover:bg-secondery`} viewBox="0 0 16 16">
+                <svg onClick={() => { setShowQRCode((p) => !p) }} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className={`bi bi-qr-code duration-300 text-tersiory cursor-pointer rounded-md p-1  ${showQRCode ? "bg-secondery" : "bg-transparent"} hover:bg-secondery`} viewBox="0 0 16 16">
                   <path d="M2 2h2v2H2z" />
                   <path d="M6 0v6H0V0zM5 1H1v4h4zM4 12H2v2h2z" />
                   <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z" />
@@ -141,7 +152,7 @@ function ClassPage() {
               value={window.document.location.origin + "/join?name=" + classData.name + "&key=" + classData.key} />}
             <h1 className='text-2xl bg-secondery rounded-md py-3 w-full text-center font-bold'>{classData.key}</h1>
           </div>
-          <div onScroll={handleAnnsScroll} className='w-[48rem] flex flex-col gap-3'>
+          <div onScroll={handleAnnsScroll} className='w-[48rem] flex flex-col gap-2'>
             <NoticeBoard notices={[{ notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" },
             { notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" }
             ]} />
@@ -153,7 +164,13 @@ function ClassPage() {
                 </svg>
               </button>
             </form>
-
+            <div className='flex justify-between'>
+              <h1 className='font-semibold'>Recent Announcements  </h1>
+              <svg onClick={() => { refetchAnns() }} xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className="text-tersiory cursor-pointer hover:rotate-[720deg] duration-[1s] bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+              </svg>
+            </div>
             {
               anns.map((ann) => (
                 <div className=' flex flex-col gap-1 w-full rounded-md  border border-tersiory/50  p-4'>
@@ -167,7 +184,7 @@ function ClassPage() {
                     hour12: true
                   })}
                   </span> </h1>
-                  {ann.announce}
+                  <p className='w-full break-words overflow-wrap'>{ann.announce}</p>
                 </div>
               ))
             }
