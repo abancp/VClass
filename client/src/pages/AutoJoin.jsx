@@ -15,21 +15,25 @@ function AutoJoin() {
       },
       { withCredentials: true }
     ).then(({ data, status }) => {
-      if (status === 401) {
-        navigate('/login?for=join?name=' + params.get('name') + '&key=' + params.get('key'))
-      } else if (status === 409) {
-        toast.info("User already joined this class!")
-        navigate("/class/" + data.classid)
-      } else if (status === 404) {
-        toast.error("class not existing or the link is expired!")
-        navigate("/")
-      } else if (status === 400 && data.success) {
+      console.log(status)
+      if (data.success) {
         toast.success("Joined to class :" + params.get("name"))
         navigate('/class/' + data.classid)
       } else {
         navigate("/")
       }
     })
+      .catch(({ response } ) => {
+        if (response.status === 401) {
+          navigate('/login?for=join?name=' + params.get('name') + '&key=' + params.get('key'))
+        } else if (response.status === 409) {
+          toast.info("User already joined this class!")
+          navigate("/class/" + response.data.classid)
+        } else if (response.status === 404) {
+          toast.error("class not existing or the link is expired!")
+          navigate("/")
+        }
+      })
 
   }, [navigate, params])
   return (
