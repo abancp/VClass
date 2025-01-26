@@ -121,10 +121,10 @@ def join_class(userdata):
         userObjectId = ObjectId(userdata['userid'])
         found_class = classes.find_one(data)
         if not found_class:
-            return jsonify({"success":False,"message":"class not found"})
+            return jsonify({"success":False,"message":"class not found"}),404
         user = users.find_one({"_id":userObjectId},{"student":1,"teacher":1})
         if str(found_class['_id']) in user['student'] or str(found_class['_id']) in user['student']:
-            return jsonify({"success":False,"message":"users already joined"})
+            return jsonify({"success":False,"message":"users already joined"}),409
         users.update_one({"_id":userObjectId},{"$push":{"student":str(found_class['_id'])}})
         classes.update_one({"_id":found_class['_id']},{"$push":{"students":str(userdata['userid'])},"$inc":{"number_of_students":1}})
         userdata['roles'][str(found_class['_id'])] = "student"
