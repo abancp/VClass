@@ -10,6 +10,7 @@ import { BrowserRouter ,Routes,Route} from 'react-router';
 import ClassPage from './pages/Class';
 import AddWork from './pages/AddWork';
 import { Toaster } from 'sonner';
+import AutoJoin from './pages/AutoJoin';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -23,6 +24,7 @@ root.render(
         <Route path="class/:id" element={<ClassPage/>} />
         <Route path="class/:id/add/:type" element={<AddWork/>} />
         <Route path="create/class" element={<CreateClass/>} />
+        <Route path="join" element={<AutoJoin/>} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

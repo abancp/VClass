@@ -1,6 +1,9 @@
 import axios from 'axios'
+import { document } from 'postcss'
+import { QRCodeSVG } from 'qrcode.react'
 import React, { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { QRCode } from 'react-qrcode-logo'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 import Header from '../components/main/Header'
@@ -21,6 +24,9 @@ function ClassPage() {
   const [peoples, setPeoples] = useState({ students: [], teachers: [] })
   const [anns, setAnns] = useState([])
   const [annSkip, setAnnSkip] = useState(0)
+  const [workFetch, setWorkFetch] = useState(false)
+  const [showQRCode, setShowQRCode] = useState(false)
+
 
   useEffect(() => {
     axios.get(SERVER_URL + "/class/" + id, { withCredentials: true })
@@ -28,15 +34,15 @@ function ClassPage() {
         console.log(data)
         setClassData(data.class)
       })
-
-
   }, [id])
 
   useEffect(() => {
-    if (selected !== "works" 
-    ) return
+    if (selected !== "works" || (workFetch && worksSkip === 0)) {
+      return
+    }
     axios.get(SERVER_URL + "/work/works/" + id + "?skip=" + worksSkip, { withCredentials: true }).then(({ data }) => {
       if (data.success) {
+        setWorkFetch(true)
         console.log("Fetched works")
         setWorks((p) => [...p, ...data.works])
       }
@@ -50,6 +56,7 @@ function ClassPage() {
       }
     })
   }, [annSkip, id])
+
   useEffect(() => {
     if (selected === "peoples" && peoples?.teachers?.length === 0) {
       axios.get(SERVER_URL + "/class/peoples/" + id, { withCredentials: true })
@@ -58,8 +65,7 @@ function ClassPage() {
           setPeoples(data.peoples)
         })
     }
-
-  }, [selected,id])
+  }, [selected, id])
 
 
   const handleWorksScroll = (e) => {
@@ -69,6 +75,7 @@ function ClassPage() {
       setWorksSkip(works.length)
     }
   }
+
   const handleAnnsScroll = (e) => {
     const { offsetHeight, scrollTop, scrollHeight } = e.target
     console.log(offsetHeight, scrollTop, scrollHeight)
@@ -89,6 +96,10 @@ function ClassPage() {
       })
   }
 
+  const handleCopyJoinUrl = () => {
+    navigator.clipboard.writeText(window.document.location.origin + "/join?name=" + classData.name + "&key=" + classData.key)
+    toast.success("Copied to Clipboard!")
+  }
 
   return (
     <div className={`w-full flex-grow text-light pt-header ${showSidebar ? "pl-[15rem]" : "pl-[3rem]"} min-h-screen bg-dark transition-all duration-300`}>
@@ -97,16 +108,37 @@ function ClassPage() {
       <Sidebar selected={selected} handleChange={(type) => setSelected(type)} full={showSidebar} forWhat={"class"} classname={classData.name} />
       {selected === "class" &&
         <main className='p-4 flex gap-8 justify-center items-start'>
-          <div className='w-[15rem] p-3 rounded-md flex flex-col gap-3 h-[9.4rem] border border-tersiory/50'>
-            <div className='flex flex-col justify-center items-start justify-between'>
+          <div className={`w-[15rem] transition-all ${showQRCode?"h-[24.5rem]":"h-[9.9rem]"} p-3 rounded-md flex flex-col gap-3 duration-100 border border-tersiory/50`}>
+            <div className='flex gap-2 flex-col justify-center items-start justify-between'>
               <h1 className=" text-lg font-semibold">Class Key</h1>
-              <div className='flex items-center gap-2 text-tersiory cursor-pointer'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-copy" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z" />
+              <div className='flex justify-between items-center w-full'>
+                <div onClick={handleCopyJoinUrl} className='flex group items-center gap-1 text-tersiory cursor-pointer'>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="bi p-1 rounded-md bi-copy duration-300 group-hover:bg-secondery" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z" />
+                  </svg>
+                  <h1 className=" text-lg font-semibold">  copy invite link</h1>
+                </div>
+                <svg onClick={()=>{setShowQRCode((p)=>!p)}} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className={`bi bi-qr-code duration-300 text-tersiory cursor-pointer rounded-md p-1  ${showQRCode?"bg-secondery":"bg-transparent"} hover:bg-secondery`} viewBox="0 0 16 16">
+                  <path d="M2 2h2v2H2z" />
+                  <path d="M6 0v6H0V0zM5 1H1v4h4zM4 12H2v2h2z" />
+                  <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z" />
+                  <path d="M10 0v6h6V0zm5 1v4h-4V1zM8 1V0h1v2H8v2H7V1zm0 5V4h1v2zM6 8V7h1V6h1v2h1V7h5v1h-4v1H7V8zm0 0v1H2V8H1v1H0V7h3v1zm10 1h-1V7h1zm-1 0h-1v2h2v-1h-1zm-4 0h2v1h-1v1h-1zm2 3v-1h-1v1h-1v1H9v1h3v-2zm0 0h3v1h-2v1h-1zm-4-1v1h1v-2H7v1z" />
+                  <path d="M7 12h1v3h4v1H7zm9 2v2h-3v-1h2v-1z" />
                 </svg>
-                <h1 className=" text-lg font-semibold">  copy invite link</h1>
               </div>
             </div>
+            {showQRCode && <QRCode
+              qrStyle='dots'
+              eyeRadius={[
+                // Rounds the eye modules (finder patterns)
+                [15, 15, 15, 15], // Top-left
+                [15, 15, 15, 15], // Top-right
+                [15, 15, 15, 15], // Bottom-left
+              ]}
+              bgColor='#120f18'
+              fgColor='#1192B8'
+              size={200}
+              value={window.document.location.origin + "/join?name=" + classData.name + "&key=" + classData.key} />}
             <h1 className='text-2xl bg-secondery rounded-md py-3 w-full text-center font-bold'>{classData.key}</h1>
           </div>
           <div onScroll={handleAnnsScroll} className='w-[48rem] flex flex-col gap-3'>
@@ -156,14 +188,14 @@ function ClassPage() {
                     <h6 className='font-light text-[14px]'>{work.teacher_name}</h6>
                     <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>{work.type}</div>
                     <h6 className='font-light text-[14px]' >{new Date(work.time).toLocaleString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'numeric',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true
-                  })}</h6>
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'numeric',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: 'numeric',
+                      hour12: true
+                    })}</h6>
                   </div>
                 </div>
               ))
