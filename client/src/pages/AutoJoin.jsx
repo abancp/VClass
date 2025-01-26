@@ -13,8 +13,8 @@ function AutoJoin() {
         key: params.get("key")
       },
       { withCredentials: true }
-    ).then(({ data }) => {
-      if (data.staus === 401) {
+    ).then(({ data,status }) => {
+      if (status === 401) {
         navigate('/login?for=join?name='+params.get('name')+'&key='+params.get('key'))
       }
       if (data.success) {
