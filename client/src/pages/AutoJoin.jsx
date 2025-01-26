@@ -25,7 +25,8 @@ function AutoJoin() {
     })
       .catch(({ response } ) => {
         if (response.status === 401) {
-          navigate('/login?for=join?name=' + params.get('name') + '&key=' + params.get('key'))
+          console.log("/login?to=join&name="+params.get('name')+'&key='+params.get('key'))
+          navigate("/login?to=join&name="+params.get('name')+'&key='+params.get('key'))
         } else if (response.status === 409) {
           toast.info("User already joined this class!")
           navigate("/class/" + response.data.classid)

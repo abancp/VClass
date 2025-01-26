@@ -1,18 +1,19 @@
 import axios from "axios"
-import { useNavigate,Link } from "react-router"
+import { useNavigate, Link, useSearchParams } from "react-router"
 import Header from "../components/main/Header"
 import { SERVER_URL } from "../config/SERVER_URL"
 import useStore from "../store/store"
 
 function Login() {
 
-  const state = useStore((state)=>state)
+  const state = useStore((state) => state)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    axios.post(SERVER_URL+"/login",
+    axios.post(SERVER_URL + "/login",
       {
         email: e.target.email.value,
         password: e.target.password.value
@@ -21,23 +22,29 @@ function Login() {
         withCredentials: true
       }
     ).then((res) => {
-      console.log(res.data)        
-        state.setUsername(res.data.username)
-        state.setIsLogin(true)
-        state.fetchUserdata()
-      navigate('/')
+      console.log(res.data)
+      state.setUsername(res.data.username)
+      state.setIsLogin(true)
+      state.fetchUserdata()
+      console.log(decodeURIComponent(searchParams.get("to")))
+      if (searchParams.get('to') === "join") {
+        navigate("/join?name=" + searchParams.get('name') + "&key=" + searchParams.get('key'))
+      } else {
+        navigate('/')
+      }
     })
   }
 
   return <>
     <div className="min-h-screen pt-header justify-center text-light bg-dark flex items-center w-100 ">
-      <Header/>
+      <Header />
       <div className="border border-black bg-secondery w-[50rem] h-[23rem] justify-between items-center flex rounded-md">
         <div className="w-1/2 gap-3 h-full flex flex-col justify-center items-center">
           <div className="flex flex-col gap-3 text-center">
             <h1 className="text-3xl font-bold ">Login</h1>
             <p>Login VClass</p>
-            <p>already have an account <Link className="underline text-blue-600" to="/signup" >signup here</Link></p>
+            <p>already have an account <Link className="underline text-blue-600" to={searchParams.get('to') ? "/signup?to=join&name=" + searchParams.get('name') + '&key=' + searchParams.get('key') : "/signup"} >signup here</Link></p>
+
           </div>
           <h2 className="font-semibold text-xl ">OR Continue with</h2>
           <div className="flex flex-col gap-1 w-full items-center">
