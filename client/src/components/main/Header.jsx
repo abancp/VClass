@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Link } from "react-router"
 import useStore from '../../store/store'
 
-function Header({ sub, handleMenuClick, forWhat }) {
+function Header({ sub, handleMenuClick,handleClose,sub1, forWhat }) {
 
   const isLogin = useStore((state) => state.isLogin)
   const username = useStore((state) => state.username)
@@ -24,11 +24,11 @@ function Header({ sub, handleMenuClick, forWhat }) {
           </svg>
         }
         {forWhat ==="popup"&&
-          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="text-tersiory bi bi-x-lg" viewBox="0 0 16 16">
+          <svg onClick={handleClose} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="hover:rotate-[180deg] duration-300 text-tersiory cursor-pointer bi bi-x-lg" viewBox="0 0 16 16">
   <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
 </svg>
         }
-        <h1 className='text-xl font-bold'><Link to="/" >VClass</Link> {sub && "/"} {sub}</h1>
+        <h1 className='text-xl font-bold'><Link to="/" >VClass</Link> {sub && "/"} {sub} {sub1 && "/"} {sub1}</h1>
       </div>
       <div className="flex gap-3">
         {(forWhat === "home" && isLogin) && <Link to="/create/class">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useParams } from 'react-router'
+import { useParams,useNavigate} from 'react-router'
 import Header from '../components/main/Header'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 function AddWork() {
   const { type, id } = useParams()
   const [dueDate, setDueDate] = useState(new Date())
+  const navigate = useNavigate()
   const handleAssign = (e) => {
     e.preventDefault()
     switch (type.toLowerCase()) {
@@ -46,7 +47,7 @@ function AddWork() {
   }
   return (
     <div className='w-full text-light  h-full bg-dark pt-header min-h-screen'>
-      <Header forWhat="popup" sub="Add Assignment" />
+      <Header handleClose={()=>{navigate("/class/"+id+"/")}} forWhat="popup" sub="Add Assignment" />
       <form onSubmit={handleAssign} className='h-full p-3 flex gap-3'>
         <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
           <div>

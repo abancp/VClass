@@ -114,7 +114,7 @@ function ClassPage() {
 
   return (
     <div className={`w-full flex-grow text-light pt-header ${showSidebar ? "pl-[15rem]" : "pl-[3rem]"} min-h-screen bg-dark transition-all duration-300`}>
-      <Header sub={classData.name} forWhat="class" handleMenuClick={() => { setShowSidebar((prev) => !prev) }} />
+      <Header sub={classData.name} sub1={selected.charAt(0).toUpperCase() + selected.slice(1)} forWhat="class" handleMenuClick={() => { setShowSidebar((prev) => !prev) }} />
       {showWorkPopup && <CreateWorkPopup id={id} handleClose={() => { setShowWorkPopup(false) }} />}
       <Sidebar selected={selected} handleChange={(type) => setSelected(type)} full={showSidebar} forWhat={"class"} classname={classData.name} />
       {selected === "class" &&
@@ -245,6 +245,11 @@ function ClassPage() {
           }
 
         </main>
+      }
+
+      {
+        selected === "calender" &&
+        <main></main>
       }
     </div>
   )
