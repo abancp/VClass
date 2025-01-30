@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useParams,useNavigate} from 'react-router'
+import { useParams, useNavigate } from 'react-router'
 import Header from '../components/main/Header'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -11,6 +11,10 @@ function AddWork() {
   const { type, id } = useParams()
   const [dueDate, setDueDate] = useState(new Date())
   const navigate = useNavigate()
+  
+
+  const [quiz,setQuiz] = useState([])
+
   const handleAssign = (e) => {
     e.preventDefault()
     switch (type.toLowerCase()) {
@@ -33,6 +37,10 @@ function AddWork() {
           })
           break
         }
+      case "quiz": {
+
+        break
+      }
       default:
         {
           console.log("Invalid")
@@ -40,27 +48,48 @@ function AddWork() {
     }
   }
 
-  if (!(type.toLowerCase() === "assignment")) {
+  if (!(type.toLowerCase() === "assignment" || type.toLowerCase() === "quiz")) {
     return (
       <div className=''>Page Not Found</div>
     )
   }
   return (
     <div className='w-full text-light  h-full bg-dark pt-header min-h-screen'>
-      <Header handleClose={()=>{navigate("/class/"+id+"/")}} forWhat="popup" sub="Add Assignment" />
+      <Header handleClose={() => { navigate("/class/" + id + "/") }} forWhat="popup" sub="Add Assignment" />
       <form onSubmit={handleAssign} className='h-full p-3 flex gap-3'>
-        <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
-          <div>
-            <h1 className='ml-2 font-bold'>Title  <span className='text-red-600'>*</span> </h1>
-            <input required name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' />
+        <div className='flex flex-col gap-3'>
+          <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
+            <div>
+              <h1 className='ml-2 font-bold'>Title  <span className='text-red-600'>*</span> </h1>
+              <input required name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' />
 
+            </div>
+            <div className=''>
+              <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *<i className='font-normal'>italic</i>* _<b>strong</b>_ </span></h1>
+              <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-[9rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
+            </div>
           </div>
-          <div>
-           <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *<i className='font-normal'>italic</i>* _<b>strong</b>_ </span></h1>
-            <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-full min-h-[7rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
-          </div>
+          {type.toLowerCase() === "quiz" &&
+            <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
+              <div className='flex px-2 justify-between'>
+                <h1 className='font-semibold'>Add Items</h1>
+                <div className='flex justify-end'>
 
 
+
+                </div>
+              </div>
+              <div>
+                <h1 className='ml-2 font-bold'>Title  <span className='text-red-600'>*</span> </h1>
+                <input required name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' />
+
+              </div>
+              <div>
+                <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *<i className='font-normal'>italic</i>* _<b>strong</b>_ </span></h1>
+                <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-[9rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
+              </div>
+            </div>
+          }
         </div>
 
         <div className='bg-secondery w-full h-fit max-h-full flex flex-col items-start gap-3 p-3 rounded-md border border-tersiory/50'>
