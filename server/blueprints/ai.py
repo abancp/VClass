@@ -14,4 +14,4 @@ def gen(userdata):
         response = model.generate_content(data['prompt'])
         return jsonify({"success":True,"response":response.text})
     except Exception as e:
-        return jsonify({"success":False,"message":"something went wrong!","error":e})
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)})
