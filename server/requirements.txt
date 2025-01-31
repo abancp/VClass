@@ -7,3 +7,4 @@ flask_cors
 bcrypt
 nanoid
 gunicorn
+google.generativeai
