@@ -40,9 +40,18 @@ def create_class(userdata):
 @member_required
 def get_class(class_id,userdata):
     try:
-        class_ = classes.find_one({"_id":ObjectId(class_id)},{'_id':1,'name':1,'subject':1,'description':1,'key':1,'number_of_students':1,'creater':1})
+        class_ = classes.find_one({"_id":ObjectId(class_id)})
+        if not class_:
+            return jsonify({"succes":False,"message":"class not found!"}),404
+
         class_['_id'] = str(class_['_id'])
-        return jsonify({"succes":True,"class":class_})
+        del class_['students']
+
+        if userdata['userid'] not in class_['teachers']:
+            del class_['teachers']
+            del class_['key']
+            return jsonify({"success":True,"role":"student","class":class_}) 
+        return jsonify({"succes":True,"role":"teacher","class":class_})
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}) , 500

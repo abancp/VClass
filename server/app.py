@@ -6,6 +6,7 @@ from blueprints.auth import auth_bp
 from blueprints.class_bp import class_bp
 from blueprints.announcement import ann_bp
 from blueprints.work import work_bp
+from blueprints.ai import ai_bp
 from dotenv import load_dotenv
 import os
 
@@ -23,6 +24,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(class_bp,url_prefix='/class')
 app.register_blueprint(work_bp,url_prefix='/work')
 app.register_blueprint(ann_bp,url_prefix='/ann')
+app.register_blueprint(ai_bp,url_prefix='/ai')
 
 with app.app_context():
     try:

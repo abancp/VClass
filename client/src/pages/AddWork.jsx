@@ -55,7 +55,7 @@ function AddWork() {
   }
   return (
     <div className='w-full text-light  h-full bg-dark pt-header min-h-screen'>
-      <Header handleClose={() => { navigate("/class/" + id + "/") }} forWhat="popup" sub="Add Assignment" />
+      <Header handleClose={() => { navigate("/class/" + id + "?tab=works") }} forWhat="popup" sub="Add Assignment" />
       <form onSubmit={handleAssign} className='h-full p-3 flex gap-3'>
         <div className='flex flex-col gap-3'>
           <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
