@@ -16,12 +16,13 @@ def member_required(f):
             if not token or not class_id:
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
             data = jwt.decode(token,str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
-            print(data)
-            if not data['roles'][class_id] in ["student","teacher"]:
+            data['role'] = data['roles'][class_id] 
+            if data['role'] not in ["student","teacher"]:
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
 
-        except :
-            return jsonify({"success":False,"message":"Somthing went wrong while Authonticating"}) , 500 
+        except Exception as e:
+            print(e)
+            return jsonify({"success":False,"message":"Somthing went wrong while Authonticating","error":str(e)}) , 500 
         
         return f(*args,**kwargs,userdata=data)
     return decorated_function

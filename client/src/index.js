@@ -11,6 +11,7 @@ import ClassPage from './pages/Class';
 import AddWork from './pages/AddWork';
 import { Toaster } from 'sonner';
 import AutoJoin from './pages/AutoJoin';
+import Work from './pages/Work';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -23,6 +24,7 @@ root.render(
         <Route path="signup" element={<Signup/>} />
         <Route path="class/:id" element={<ClassPage/>} />
         <Route path="class/:id/add/:type" element={<AddWork/>} />
+        <Route path="class/:id/:work_type/:work_id" element={<Work/>} />
         <Route path="create/class" element={<CreateClass/>} />
         <Route path="join" element={<AutoJoin/>} />
       </Routes>

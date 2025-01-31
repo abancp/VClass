@@ -11,6 +11,7 @@ module.exports = {
         tersiory: "#1192B8",
         light: "#B6EADA"
       },
+
       backgroundSize: {
         'size-200': '200% 200% 200% 200%',
       },
@@ -18,11 +19,11 @@ module.exports = {
         'pos-0': '0% 0% 0% 0%',
         'pos-100': '100% 100% 100% 100%',
       },
-      fontFamily:{
-        paint : ["Finger Paint", "serif"] 
+      fontFamily: {
+        paint: ["Finger Paint", "serif"]
       },
-      padding:{
-        header : '3.5rem'
+      padding: {
+        header: '3.5rem'
       }
     },
   },

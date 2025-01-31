@@ -21,6 +21,16 @@ function Sidebar({ selected, full, classname, handleChange }) {
         {full && "Class"}
       </div>
 
+      <div onClick={() => handleChange("vclass_ai")} className={`${selected === "vclass_ai" ? " bg-dark  text-tersiory border-tersiory border-r-secondery" : " border-secondery bg-dark/70"} ${full ? "w-[10rem]" : "w-[2.7rem]"}   duration-300 px-3 flex items-center justify-start gap-2 rounded-l-md hover:border-tersiory  hover:text-tersiory cursor-pointer bg-dark border-l border-y  py-2`}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-right-dots" viewBox="0 0 16 16">
+          <path d="M2 1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h9.586a2 2 0 0 1 1.414.586l2 2V2a1 1 0 0 0-1-1zm12-1a2 2 0 0 1 2 2v12.793a.5.5 0 0 1-.854.353l-2.853-2.853a1 1 0 0 0-.707-.293H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z" />
+          <path d="M5 6a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+        </svg>
+        {full && "VClass AI"}
+      </div>
+
+
+
       <div onClick={() => handleChange("works")} className={`${selected === "works" ? "bg-dark  border-tersiory text-tersiory border-r-secondery" : "border-secondery bg-dark/70"} ${full ? "w-[10rem]" : "w-[2.7rem]"}  flex items-center justify-start gap-2 px-3 rounded-l-md hover:border-tersiory border-l border-y duration-300  cursor-pointer hover:text-tersiory  py-2`}>
 
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-clipboard2" viewBox="0 0 16 16">

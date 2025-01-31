@@ -16,8 +16,8 @@ def teacher_required(f):
             if not token or not class_id:
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
             data = jwt.decode(token,str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
-            print(data)
-            if not data['roles'][class_id] == "teacher":
+            data['roles'][class_id] = data['role']
+            if not data['role'] == "teacher":
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
 
         except Exception as e:
