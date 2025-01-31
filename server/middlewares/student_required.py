@@ -17,7 +17,7 @@ def student_required(f):
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
             data = jwt.decode(token,str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
             print(data)
-            data['roles'][class_id] = data['role']
+            data['role'] = data['roles'][class_id] 
             if not data['role'] == "student":
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
 
