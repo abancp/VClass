@@ -12,6 +12,7 @@ function AIChat() {
   const handleGenerate = (e) => {
     e.preventDefault()
     if (thinking) return
+    setPrompt("")
     setThinking(true)
     setChats((prev) => [...prev, { user: prompt }])
     axios.post(SERVER_URL + "/ai/gen", { prompt: prompt }, { withCredentials: true })
@@ -37,7 +38,7 @@ function AIChat() {
             let isUser = chat.user !== undefined;
             return (
               <div className={`flex w-[50rem] ${isUser ? " justify-end" : "justify-start"}`}>
-                <div className={`rounded-md p-2 ${isUser && "max-w-[45rem] bg-secondery/30"}`}><ReactMarkdown remarkPlugins={[remarkGfm]}>{isUser ? chat.user : chat.ai}</ReactMarkdown></div>
+                <div className={`rounded-2xl px-4 p-2 ${isUser && "max-w-[45rem] bg-secondery/30"}`}><ReactMarkdown remarkPlugins={[remarkGfm]}>{isUser ? chat.user : chat.ai}</ReactMarkdown></div>
               </div>
             );
           })

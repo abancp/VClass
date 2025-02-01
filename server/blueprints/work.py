@@ -36,16 +36,20 @@ def get_works(class_id,userdata):
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)})
 
 
-@work_bp.route("/<class_id>/<work_type>/<work_id>")
+@work_bp.route("/<class_id>/<work_type>/<work_id>",methods=['POST','GET'])
 @member_required
-def get_work(class_id,work_type,work_id,userdata):
-    try:
-        work = works.find_one({"_id":ObjectId(work_id)})
-        if userdata['role'] == "teacher":
-            return jsonify({"success":True,"work":json.loads(json_util.dumps(work))})
-        else:
-            if work['analysis']:
-                del work['analysis']
-            return jsonify({"success":True,"work":json.loads(json_util.dumps(work))})
-    except Exception as e:
-        return jsonify({"Success":False,"message":"something went wrong!","error":str(e)}),500
+def get_or_submit_work(class_id,work_type,work_id,userdata):
+    if request.method == "GET":
+        try:
+            work = works.find_one({"_id":ObjectId(work_id)})
+            class_ = classes.find_one({"_id":ObjectId(class_id)},{"name":1})
+            if userdata['role'] == "teacher":
+                return jsonify({"success":True,"work":json.loads(json_util.dumps(work))})
+            else:
+                if work['analysis']:
+                    del work['analysis']
+                return jsonify({"success":True,"class":json.loads(json_util.dumps(class_)),"work":json.loads(json_util.dumps(work))})
+        except Exception as e:
+            return jsonify({"Success":False,"message":"something went wrong!","error":str(e)}),500
+
+
