@@ -13,12 +13,13 @@ def member_required(f):
                 if 'class_id' in data:
                     class_id = data['class_id']
             token = request.cookies.get("token")
+            print("class_id",class_id,"token",token)
             if not token or not class_id:
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
             data = jwt.decode(token,str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
             data['role'] = data['roles'][class_id] 
             if data['role'] not in ["student","teacher"]:
-                return jsonify({"success":False,"message":"Auth failed"}) , 401
+                return jsonify({"success":False,"message":"Auth failed","error":"role not matching"}) , 401
 
         except Exception as e:
             print(e)

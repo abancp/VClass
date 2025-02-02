@@ -59,65 +59,74 @@ def get_class(class_id,userdata):
 @class_bp.route("/peoples/<class_id>",methods=['GET'])
 @member_required
 def get_peoples(class_id,userdata):
+
     pipeline = [
-  {
-    "$match": {
-      "_id": ObjectId(class_id)    }
-  },
-  {
-    "$addFields": {
-      "students": {
-        "$map": {
-          "input": "$students",
-          "as": "studentId",
-          "in": { "$toObjectId": "$$studentId" }
+    {
+        "$match": {
+            "_id": ObjectId(class_id)
         }
-      },
-      "teachers": {
-        "$map": {
-          "input": "$teachers",
-          "as": "teacherId",
-          "in": { "$toObjectId": "$$teacherId" }
+    },
+    {
+        "$addFields": {
+            "students": {
+                "$map": {
+                    "input": "$students",
+                    "as": "studentId",
+                    "in": { "$toObjectId": "$$studentId" }
+                }
+            },
+            "teachers": {
+                "$map": {
+                    "input": "$teachers",
+                    "as": "teacherId",
+                    "in": { "$toObjectId": "$$teacherId" }
+                }
+            }
         }
-      }
-    }
-  },
-  {
-    "$lookup": {
-      "from": "users",
-      "localField": "students",
-      "foreignField": "_id",
-      "as": "studentDetails"
-    }
-  },
-  {
-    "$lookup": {
-      "from": "users",
-      "localField": "teachers",
-      "foreignField": "_id",
-      "as": "teacherDetails"
-    }
-  },
-  {
-    "$project": {
-      "_id": 0,
-      "students": {
-        "$map": {
-          "input": "$studentDetails",
-          "as": "student",
-          "in": "$$student.username"
+    },
+    {
+        "$lookup": {
+            "from": "users",
+            "localField": "students",
+            "foreignField": "_id",
+            "as": "studentDetails"
         }
-      },
-      "teachers": {
-        "$map": {
-          "input": "$teacherDetails",
-          "as": "teacher",
-          "in": "$$teacher.username"
+    },
+    {
+        "$lookup": {
+            "from": "users",
+            "localField": "teachers",
+            "foreignField": "_id",
+            "as": "teacherDetails"
         }
-      }
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "students": {
+                "$map": {
+                    "input": "$studentDetails",
+                    "as": "student",
+                    "in": {
+                        "username": "$$student.username",
+                        "_id": { "$toString": "$$student._id" }  # Convert ObjectId to string
+                    }
+                }
+            },
+            "teachers": {
+                "$map": {
+                    "input": "$teacherDetails",
+                    "as": "teacher",
+                    "in": {
+                        "username": "$$teacher.username",
+                        "_id": { "$toString": "$$teacher._id" }  # Convert ObjectId to string
+                    }
+                }
+            }
+        }
     }
-  }
 ]
+   
     peoples = classes.aggregate(pipeline)
     return jsonify({"peoples":json_util.loads(json_util.dumps(peoples))[0],"success":True})
 
@@ -201,7 +210,4 @@ def get_classes(userdata):
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"Something went wrong"}),500
-
-   
-
 

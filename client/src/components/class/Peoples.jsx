@@ -20,13 +20,13 @@ function Peoples({ id }) {
       <h1 className='text-x py-2 rounded-md border border-tersiory px-4 font-bold'>Teachers</h1>
       {
         peoples?.teachers?.map((teacher) => (
-          <div className='py-2 w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{teacher}</div>
+          <div className='py-2 w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{teacher.username}</div>
         ))
       }
       <h1 className='text-x  py-2 rounded-md border border-tersiory px-4 font-bold'>Students</h1>
       {
         peoples?.students?.map((student) => (
-          <div className='py-2 w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{student}</div>
+          <div className='py-2 w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{student.username}</div>
         ))
       }
 
