@@ -3,6 +3,9 @@ import React, { useEffect, useState } from 'react'
 import { SERVER_URL } from '../../config/SERVER_URL'
 import CreateWorkPopup from '../popup/CreateWorkPopup'
 import { Link } from 'react-router'
+import ReactMarkdown from 'react-markdown'
+import { toast } from 'sonner'
+import Switch from "react-switch"
 
 function Works({ id, role }) {
   const [works, setWorks] = useState([])
@@ -11,8 +14,12 @@ function Works({ id, role }) {
   const [showWorkPopup, setShowWorkPopup] = useState(false)
   const [showWork, setShowWork] = useState(false)
   const [showFileUploader, setShowFileUploader] = useState(false)
-  const [fileLink,setFileLink] = useState()
-  const [workid,setWorkid] = useState()
+  const [fileLink, setFileLink] = useState()
+  const [workid, setWorkid] = useState()
+  const [selectedWork, setSelectedWork] = useState({})
+  const [tab, setTab] = useState(role === "teacher" ? "submissions" : "instructions")
+  const [acceptSubmits, setAcceptSubmits] = useState(true)
+  const [acceptSubmitsSaving, setAcceptSubmitsSaving] = useState(false)
 
   useEffect(() => {
     if (workFetch && worksSkip === 0) {
@@ -35,34 +42,56 @@ function Works({ id, role }) {
     }
   }
 
-  const handleSubmitWork = (e)=>{
-    axios.post(SERVER_URL+"/work",{})
+  const handleSubmitWork = () => {
+    axios.post(SERVER_URL + "/work/submit/" + id + "/" + selectedWork._id.$oid, { url: fileLink }, { withCredentials: true })
+      .then(({ data }) => {
+        if (data.success) {
+          toast.success("Submitted . your teacher will check that!")
+          setShowWork(false)
+        } else {
+          toast.error(data.message)
+        }
+      })
+      .catch(({ response }) => { toast.error("something went wrong!") })
   }
 
-  
+  const handleChangeAcceptSubmits = (accept) => {
+    if (acceptSubmitsSaving) return
+    console.log("changed!", accept)
+    setAcceptSubmits(accept)
+    setAcceptSubmitsSaving(true)
+    axios.post(SERVER_URL + "/work/" + id + "/" + selectedWork._id.$oid + "/accept-submits", { accept_submits: accept }, { withCredentials: true })
+      .then(({ data }) => {
+        if (!data.success) {
+          toast.error(data.message)
+        }
+        setAcceptSubmitsSaving(false)
+      })
+      .catch(() => {
+        toast.error("something went wrong!")
+        setAcceptSubmitsSaving(false)
+      })
+  }
 
   return (
-    <div className='w-full flex flex-col gap-2 justify-between p-3 min-h-[calc(100vh-3.5rem)] '>
+    <div className='w-full flex flex-col gap-2 justify-start p-3 min-h-[calc(100vh-3.5rem)] '>
 
 
       {(showWorkPopup && role === "teacher" && !showWork) && <CreateWorkPopup id={id} handleClose={() => { setShowWorkPopup(false) }} />}
       {!showWork &&
-        <div onScroll={handleWorksScroll} className={`gap-3 flex flex-col overflow-y-scroll p-3 ${role === "teacher" ? "h-[calc(100vh-10rem)]" : "h-[calc(100vh-5rem)]"} w-full`}>
+        <div onScroll={handleWorksScroll} className={`gap-3 flex flex-col overflow-y-scroll p-3 ${role === "teacher" ? "h-[calc(100vh-9.2rem)]" : "h-[calc(100vh-5rem)]"} w-full`}>
           {
             works.map((work) => (
               <div className='rounded-2xl w-full p-2 border-tersiory/50 bg-secondery/50'>
-                <h1 onClick={() => { setShowWork(true) }} to={"/class/" + id + "/" + work.type + "/" + work._id.$oid} className='font-semibold text-lg cursor-pointer hover:text-tersiory w-fit'>{work.title}</h1>
+                <h1 onClick={() => { setShowWork(true); setSelectedWork(work); setAcceptSubmits(work.accept_submits) }} to={"/class/" + id + "/" + work.type + "/" + work._id.$oid} className='font-semibold text-lg cursor-pointer hover:text-tersiory w-fit'>{work.title}</h1>
                 <div className='flex gap-3 mt-1  text-tersiory/90 '>
                   <h6 className='font-light text-[14px]'>{work.teacher_name}</h6>
                   <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>{work.type}</div>
-                  <h6 className='font-light text-[14px]' >{new Date(work.time).toLocaleString('en-US', {
+
+                  <h6 className='font-light text-[14px]' > {new Date(work.due_date).toLocaleString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'numeric',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    hour12: true
                   })}</h6>
                 </div>
               </div>
@@ -81,30 +110,51 @@ function Works({ id, role }) {
 
       {showWork &&
         <>
-          <h1 className='text-2xl w-full text-center font-semibold'>Assignment 1</h1>
-          <div className='border-t border-tersiory w-full'></div>
-          <div className='px-5 overflow-y-scroll h-[calc(100vh-12.9rem)]'>
-            <div>must submit as pdf</div>
+          <h1 className='text-2xl w-full text-center font-semibold'>{selectedWork.title}</h1>
+          <div className='border-b flex border-tersiory w-full'>
+            {role === "teacher" && <div onClick={() => setTab("instructions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "instructions" && "bg-secondery"}`}>Instructions</div>}
+            {role === "teacher" && <div onClick={() => setTab("submissions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "submissions" && "bg-secondery"}`}>Submissions</div>}
           </div>
-          <div className='flex w-full justify-center'>
-            <div className={`rounded-2xl flex flex-col text-lg duration-200 items-center justify-end gap-1 p-1 ${showFileUploader?"h-[4.3rem]":"h-[2.3rem]"} bg-secondery/50`}>
-              {showFileUploader && <div className={` ${showFileUploader ? "h-[2rem]" : "h-0"} duration-300 flex justify-center`}>
-                <input value={fileLink} onChange={(e)=>setFileLink(e.target.value)} placeholder='paste link here..' className='bg-dark  h-full focus:outline-none px-1 rounded-2xl'/>
-              </div>}
-              <div className='flex'>
-                <div onClick={() => { setShowFileUploader((p) => !p) }} className='gap-2 px-2 flex items-center duration-300 hover:bg-dark/60 cursor-pointer rounded-2xl '>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-paperclip text-tersiory" viewBox="0 0 16 16">
-                    <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z" />
-                  </svg>
-                  add file</div>
-                <div onClick={handleSubmitWork} className='gap-2 px-2 bg-secondery/60 flex items-center duration-300  hover:bg-secondery cursor-pointer rounded-2xl'>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-circle-fill text-green-800" viewBox="0 0 16 16">
-                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-                  </svg>
-                  mark as done</div>
+          {tab === "instructions" && <div className={`px-5 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-10.9rem)]" : "h-[calc(100vh-12.9rem)]"}`}>
+            <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>
+          </div>}
+          {(tab === "submissions" && role === "teacher") &&
+            <div className='flex h-full gap-3 w-full'>
+              <div className='p-4 w-[20rem] flex flex-col gap-2'>
+                <h1 className='text-2xl font-semibold text-tersiory'><span className='text-green-600'>10</span>/30 Submitted</h1>
+                <div className='flex items-center  gap-2'>
+                  <Switch checked={acceptSubmits} height={20} width={48} onChange={handleChangeAcceptSubmits} />
+                  {acceptSubmitsSaving && <p>saving...</p>}
+                  <h4>accepting submissions</h4>
+                </div>
+
+              </div>
+
+              <div className='p-2 border-l border-tersiory w-fit h-full'>
+                <h1 className='text-2xl font-semibold'>Submissions</h1>
               </div>
             </div>
-          </div>
+          }
+          {role === "student" &&
+            <div className='flex w-full justify-center'>
+              <div className={`rounded-2xl flex flex-col text-lg duration-200 items-center justify-end gap-1 p-1 ${showFileUploader ? "h-[4.3rem]" : "h-[2.3rem]"} bg-secondery/50`}>
+                {showFileUploader && <div className={` ${showFileUploader ? "h-[2rem]" : "h-0"} duration-300 flex justify-center`}>
+                  <input value={fileLink} onChange={(e) => setFileLink(e.target.value)} placeholder='paste link here..' className='bg-dark  h-full focus:outline-none px-1 rounded-2xl' />
+                </div>}
+                <div className='flex'>
+                  <div onClick={() => { setShowFileUploader((p) => !p) }} className='gap-2 px-2 flex items-center duration-300 hover:bg-dark/60 cursor-pointer rounded-2xl '>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-paperclip text-tersiory" viewBox="0 0 16 16">
+                      <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z" />
+                    </svg>
+                    add file</div>
+                  <div onClick={handleSubmitWork} className='gap-2 px-2 bg-secondery/60 flex items-center duration-300  hover:bg-secondery cursor-pointer rounded-2xl'>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-check-circle-fill text-green-800" viewBox="0 0 16 16">
+                      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                    </svg>
+                    mark as done</div>
+                </div>
+              </div>
+            </div>}
         </>
 
       }
