@@ -6,7 +6,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from 'axios';
 import { SERVER_URL } from '../config/SERVER_URL';
 import { toast } from 'sonner';
-import { sub } from 'date-fns';
 
 function AddWork() {
   const { type, id } = useParams()
@@ -15,14 +14,14 @@ function AddWork() {
 
 
   const [quiz, setQuiz] = useState([{
-    question: 'Question 1',
+    question: '',
     type: 'MCQ',
     options: [
-      'Option 1',
-      'Option 2',
-      'Option 3'
+      '',
+      '',
+      ''
     ],
-    'answer': 'Option 3',
+    'answer': '',
   }])
   const [students, setStudents] = useState([])
   const [selectedStudents, setSelectedStudents] = useState(['*'])
@@ -118,24 +117,33 @@ function AddWork() {
               <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-[9rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
             </div>
           </div>
+          {type.toLowerCase() === "quiz" &&
+            <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
+              <div onClick={() => {
+                setQuiz((p) => [{ question: '', type: 'MCQ', options: [''] }, ...p])
+              }}
+                className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
+            </div>
+          }
           {type.toLowerCase() === "quiz" && quiz.map((q, i) => (
             <div>
-              <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
+              <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
                 <div className='flex flex-col px-2 justify-between'>
                   <div className='flex gap-2'>
                     <input
-                      placeholder={'Question '+(i+1)}
+                      placeholder={'Question ' + (i + 1)}
                       value={q.question}
                       onChange={(e) => {
                         setQuiz((p) =>
                           p.map((q0, i0) => i0 === i ? { ...q0, question: e.target.value } : q0)
                         )
                       }}
-                      className='font-semibold bg-transparent w-full p-1' />
+                      className='font-semibold border-b border-transparent focus:outline-none hover:border-tersiory/30 focus:border-b-2 border-b focus:border-tersiory bg-transparent w-full p-1' />
                     <select className='bg-transparent'>
                       <option value="MCQ" className='bg-dark'>MCQ</option>
                     </select>
                   </div>
+
                   {
                     q.type === "MCQ" && q.options.map((option, optionI) => (
                       <input
@@ -162,8 +170,8 @@ function AddWork() {
 
               <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
                 <div onClick={() => {
-                  setQuiz((p)=>[...p.slice(0,i+1),{question:'',type:'MCQ',options:['']},...p.slice(i+1)])
-                     }}
+                  setQuiz((p) => [...p.slice(0, i + 1), { question: '', type: 'MCQ', options: [''] }, ...p.slice(i + 1)])
+                }}
                   className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
               </div>
             </div>
@@ -208,8 +216,8 @@ function AddWork() {
 
           <input type="submit" value="Assign" className='cursor-pointer border duration-300 hover:bg-tersiory bg-tersiory p-3 w-full text-center text-lg border-tersiory/50 bg-tersiory/80 text-dark rounded-md' />
         </div>
-      </form>
-    </div>
+      </form >
+    </div >
   )
 }
 export default AddWork
