@@ -119,37 +119,54 @@ function AddWork() {
             </div>
           </div>
           {type.toLowerCase() === "quiz" && quiz.map((q, i) => (
-            <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
-              <div className='flex flex-col px-2 justify-between'>
-                <div className='flex gap-2'>
-                  <input
-                    value={q.question}
-                    onChange={(e) => {
-                      setQuiz((p) =>
-                        p.map((q0, i0) => i0 === i ? { ...q0, question: e.target.value } : q0)
-                      )
-                    }}
-                    className='font-semibold bg-transparent w-full p-1' />
-                  <select className='bg-transparent'>
-                    <option className='bg-dark'>MCQ</option>
-                  </select>
-                </div>
-                {
-                  q.type && q.options.map((option, i0) => (
+            <div>
+              <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
+                <div className='flex flex-col px-2 justify-between'>
+                  <div className='flex gap-2'>
                     <input
-                      className='font-semibold bg-transparent w-full p-1'
-                      value={option}
+                      placeholder={'Question '+(i+1)}
+                      value={q.question}
                       onChange={(e) => {
                         setQuiz((p) =>
-                          p.map((q0, i1) => i1 === i ? { ...q0, options: q0.options.map((op0, j) => (j === i0 ? e.target.value : op0)) } : q0))
-                      }
-                      }
-                    />
-                  ))
-                }
+                          p.map((q0, i0) => i0 === i ? { ...q0, question: e.target.value } : q0)
+                        )
+                      }}
+                      className='font-semibold bg-transparent w-full p-1' />
+                    <select className='bg-transparent'>
+                      <option value="MCQ" className='bg-dark'>MCQ</option>
+                    </select>
+                  </div>
+                  {
+                    q.type === "MCQ" && q.options.map((option, optionI) => (
+                      <input
+                        placeholder={"Option " + (optionI + 1)}
+                        className='font-semibold border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'
+                        value={option}
+                        onChange={(e) => {
+                          setQuiz((p) =>
+                            p.map((q0, i1) =>
+                              i1 === i ? {
+                                ...q0, options: q0.options.map((op0, j) =>
+                                  (j === optionI ? e.target.value : op0))
+                              } : q0
+                            ))
+                        }
+                        }
+                      />
+                    ))
+                  }
+                  <h4 onClick={() => { setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, options: [...q0.options, ''] } : q0)) }} className='w-full cursor-pointer duration-200 hover:underline hover:text-tersiory pl-2'>Add option</h4>
+
+                </div>
+              </div>
+
+              <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
+                <div onClick={() => {
+                  setQuiz((p)=>[...p.slice(0,i+1),{question:'',type:'MCQ',options:['']},...p.slice(i+1)])
+                     }}
+                  className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
               </div>
             </div>
-
           ))
           }
         </div>
