@@ -16,7 +16,18 @@ app = Flask(__name__)
 CORS(
     app,
     origins=["http://localhost:3000","https://vclass-xi.vercel.app"],
-    allow_headers=["*"],
+    allow_headers=[
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+    "User-Agent",
+    "Referer",
+    "Cache-Control",
+    "Pragma",
+]
+,
     supports_credentials=True
 )
 
