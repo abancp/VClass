@@ -42,17 +42,19 @@ def get_works(class_id,userdata):
 @student_required
 def submit_work(class_id,work_id,userdata):
         try:
+            print(userdata)
             data = request.get_json()
             time = int(datetime.datetime.now().timestamp()*1000)
-            count = works.count_documents({"work_id":work_id,"userid":userdata['userid']})
+            count = submits.count_documents({"work_id":work_id,"user_id":userdata['userid']})
+            print("count",count)
             work = works.find_one({"_id":ObjectId(work_id)},{'submit_limit':1,'auto_delete':1,'accept_submits':1,'due_date':1})
             if not work['accept_submits']:
                 return jsonify({"success":False,"message":"the work is not accepting submissions now!"})
             if work['due_date'] < int(datetime.datetime.now().timestamp() *1000):
                 return jsonify({"success":False,"message":"time end for this work!"})
-            if  count > 0:
+            if count > 0:
                 return jsonify({"success":False,"message":"you allready submitted!"})
-            submits.insert_one({"workid":work_id,"classid":class_id,"data":data,"time":time,"userid":userdata['userid']})
+            submits.insert_one({"work_id":work_id,"class_id":class_id,"data":data,"time":time,"user_id":userdata['userid']})
             return jsonify({"success":True,"message":"Work submitted!"})
         except Exception as e :
             print(e)
@@ -77,7 +79,38 @@ def get_work(class_id,work_id,userdata):
 @teacher_required
 def get_submits(class_id,work_id,userdata):
     try:
-        submissions = submits.find({"work_id":ObjectId(work_id)})
+        submissions = submits.aggregate([
+    {
+        "$match": {
+            "work_id": work_id
+        }
+    },
+    {
+        "$lookup": {
+            "from": "users",
+            "let": { "userIdStr": { "$toObjectId": "$user_id" } },  
+            "pipeline": [
+                { "$match": { "$expr": { "$eq": [ "$_id", "$$userIdStr" ] } } }
+            ],
+            "as": "user_info"
+        }
+    },
+    {
+        "$unwind": "$user_info" },
+    {
+        "$project": {
+            "_id": 1,
+            "work_id": 1,
+            "type": 1,
+            "class_id": 1,
+            "data": 1,
+            "time": 1,
+            "user_id": 1,
+            "username": "$user_info.username" 
+            }
+    }
+])
+        print(submissions)
         if not submissions:
             return jsonify({"success":True,"submits":[]})
         return jsonify({"success":True,"submits":json.loads(json_util.dumps(submissions))})

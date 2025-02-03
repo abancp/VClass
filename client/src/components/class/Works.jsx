@@ -20,6 +20,7 @@ function Works({ id, role }) {
   const [tab, setTab] = useState(role === "teacher" ? "submissions" : "instructions")
   const [acceptSubmits, setAcceptSubmits] = useState(true)
   const [acceptSubmitsSaving, setAcceptSubmitsSaving] = useState(false)
+  const [submits, setSubmits] = useState([])
 
   useEffect(() => {
     if (workFetch && worksSkip === 0) {
@@ -34,6 +35,17 @@ function Works({ id, role }) {
     })
   }, [worksSkip, workFetch, id])
 
+
+  useEffect(() => {
+    if (!showWork || role === "student") return
+    axios.get(SERVER_URL + "/work/submits/" + id + "/" + selectedWork._id.$oid, { withCredentials: true })
+      .then(({ data }) => {
+        if (data.success) {
+          setSubmits(data.submits)
+        }
+      })
+  }, [showWork, selectedWork, id, role])
+
   const handleWorksScroll = (e) => {
     const { offsetHeight, scrollTop, scrollHeight } = e.target
     console.log(offsetHeight, scrollTop, scrollHeight)
@@ -41,6 +53,7 @@ function Works({ id, role }) {
       setWorksSkip(works.length)
     }
   }
+
 
   const handleSubmitWork = () => {
     axios.post(SERVER_URL + "/work/submit/" + id + "/" + selectedWork._id.$oid, { url: fileLink }, { withCredentials: true })
@@ -110,17 +123,36 @@ function Works({ id, role }) {
 
       {showWork &&
         <>
-          <h1 className='text-2xl w-full text-center font-semibold'>{selectedWork.title}</h1>
-          <div className='border-b flex border-tersiory w-full'>
+          <div className='flex justify-between items-center'>
+            <svg onClick={() => setShowWork(false)} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="hover:rotate-[180deg] duration-300 text-tersiory cursor-pointer bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+            </svg>
+            <h1 className='text-2xl  text-center font-semibold'>{selectedWork.title}</h1>
+            <div className='text-md font-thin'>
+              <h6 className='font-light text-[14px]' >posted : {new Date(selectedWork.due_date).toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric'
+              })}</h6>
+              <h6 className='font-light text-[14px]' >posted : {new Date(selectedWork.due_date).toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric'
+              })}</h6>
+            </div>
+          </div>
+          <div className='border-b flex border-postedpostedpostedpostedpostedpostedpostedpostedpostedtersiory w-full'>
             {role === "teacher" && <div onClick={() => setTab("instructions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "instructions" && "bg-secondery"}`}>Instructions</div>}
             {role === "teacher" && <div onClick={() => setTab("submissions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "submissions" && "bg-secondery"}`}>Submissions</div>}
           </div>
-          {tab === "instructions" && <div className={`px-5 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-10.9rem)]" : "h-[calc(100vh-12.9rem)]"}`}>
+          {tab === "instructions" && <div className={`px-5 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-11.9rem)]" : "h-[calc(100vh-13.9rem)]"}`}>
             <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>
           </div>}
           {(tab === "submissions" && role === "teacher") &&
             <div className='flex h-full gap-3 w-full'>
-              <div className='p-4 w-[20rem] flex flex-col gap-2'>
+              <div className='p-4 w-[30rem] flex flex-col gap-2'>
                 <h1 className='text-2xl font-semibold text-tersiory'><span className='text-green-600'>10</span>/30 Submitted</h1>
                 <div className='flex items-center  gap-2'>
                   <Switch checked={acceptSubmits} height={20} width={48} onChange={handleChangeAcceptSubmits} />
@@ -130,8 +162,14 @@ function Works({ id, role }) {
 
               </div>
 
-              <div className='p-2 border-l border-tersiory w-fit h-full'>
+              <div className='p-2 flex flex-col gap-3 w-fit h-full'>
                 <h1 className='text-2xl font-semibold'>Submissions</h1>
+                {submits.map((submit) => (
+                  <div className='rounded-md w-[14rem] p-2 bg-secondery'>
+                    <h1>{submit.username}</h1>
+                  </div>
+                ))
+                }
               </div>
             </div>
           }

@@ -14,7 +14,16 @@ function AddWork() {
   const navigate = useNavigate()
 
 
-  const [quiz, setQuiz] = useState([])
+  const [quiz, setQuiz] = useState([{
+    question: 'Question 1',
+    type: 'MCQ',
+    options: [
+      'Option 1',
+      'Option 2',
+      'Option 3'
+    ],
+    'answer': 'Option 3',
+  }])
   const [students, setStudents] = useState([])
   const [selectedStudents, setSelectedStudents] = useState(['*'])
   const [showSelectStudentPopup, setShowSelectStudentPopup] = useState(false)
@@ -109,25 +118,39 @@ function AddWork() {
               <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-[9rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
             </div>
           </div>
-          {type.toLowerCase() === "quiz" &&
+          {type.toLowerCase() === "quiz" && quiz.map((q, i) => (
             <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
-              <div className='flex px-2 justify-between'>
-                <h1 className='font-semibold'>Add Items</h1>
-                <div className='flex justify-end'>
-
-
+              <div className='flex flex-col px-2 justify-between'>
+                <div className='flex gap-2'>
+                  <input
+                    value={q.question}
+                    onChange={(e) => {
+                      setQuiz((p) =>
+                        p.map((q0, i0) => i0 === i ? { ...q0, question: e.target.value } : q0)
+                      )
+                    }}
+                    className='font-semibold bg-transparent w-full p-1' />
+                  <select className='bg-transparent'>
+                    <option className='bg-dark'>MCQ</option>
+                  </select>
                 </div>
-              </div>
-              <div>
-                <h1 className='ml-2 font-bold'>Title  <span className='text-red-600'>*</span> </h1>
-                <input required name='title' placeholder='Title' className='w-full font-semibold bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' />
-
-              </div>
-              <div>
-                <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *<i className='font-normal'>italic</i>* _<b>strong</b>_ </span></h1>
-                <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-[9rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
+                {
+                  q.type && q.options.map((option, i0) => (
+                    <input
+                      className='font-semibold bg-transparent w-full p-1'
+                      value={option}
+                      onChange={(e) => {
+                        setQuiz((p) =>
+                          p.map((q0, i1) => i1 === i ? { ...q0, options: q0.options.map((op0, j) => (j === i0 ? e.target.value : op0)) } : q0))
+                      }
+                      }
+                    />
+                  ))
+                }
               </div>
             </div>
+
+          ))
           }
         </div>
 
@@ -152,7 +175,8 @@ function AddWork() {
                   </div>
                   <button onClick={() => selectedStudents.length === 0 ? toast.error("Select atleast one student") : setShowSelectStudentPopup(false)} className='p-3 text-md rounded-md py-1 bg-tersiory'>Select</button>
                 </div>
-              </div>}
+              </div>
+            }
           </div>
           <div className='w-full flex flex-col gap-1 '>
             <h1 className='text-md'>Due date</h1>
