@@ -18,7 +18,6 @@ function AddWork() {
     type: 'MCQ',
     options: [
       '',
-      '',
       ''
     ],
     'answer': '',
@@ -63,7 +62,7 @@ function AddWork() {
     switch (type.toLowerCase()) {
       case "assignment":
         {
-          if (selectedStudents.length == 0) return toast.error("Select atleast one student")
+          if (selectedStudents.length === 0) return toast.error("Select atleast one student")
           let dueDateUnix = new Date(dueDate)
           dueDateUnix.setUTCHours(23, 59, 59, 999)
           dueDateUnix = dueDateUnix.getTime()
@@ -85,6 +84,26 @@ function AddWork() {
           break
         }
       case "quiz": {
+        if (selectedStudents.length === 0) return toast.error("Select atleast one student")
+        let dueDateUnix = new Date(dueDate)
+        dueDateUnix.setUTCHours(23, 59, 59, 999)
+        dueDateUnix = dueDateUnix.getTime()
+        axios.post(SERVER_URL + "/work/add/quiz",
+          {
+            class_id: id,
+            title: e.target.title.value,
+            instruction: e.target.instructions.value,
+            students: selectedStudents,
+            due_date: dueDateUnix,
+            can_edit: e.target.can_edit.checked,
+            quiz
+          },
+          { withCredentials: true }
+        ).then(({ data }) => {
+          if (data.success) {
+            toast.success("Task assigned")
+          }
+        })
 
         break
       }
@@ -120,7 +139,7 @@ function AddWork() {
           {type.toLowerCase() === "quiz" &&
             <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
               <div onClick={() => {
-                setQuiz((p) => [{ question: '', type: 'MCQ', options: [''] }, ...p])
+                setQuiz((p) => [{ question: '', type: 'MCQ', options: ['', ''] }, ...p])
               }}
                 className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
             </div>
@@ -170,7 +189,7 @@ function AddWork() {
 
               <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
                 <div onClick={() => {
-                  setQuiz((p) => [...p.slice(0, i + 1), { question: '', type: 'MCQ', options: [''] }, ...p.slice(i + 1)])
+                  setQuiz((p) => [...p.slice(0, i + 1), { question: '', type: 'MCQ', options: ['', ''] }, ...p.slice(i + 1)])
                 }}
                   className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
               </div>
