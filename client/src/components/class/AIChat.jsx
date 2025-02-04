@@ -38,7 +38,10 @@ function AIChat() {
             let isUser = chat.user !== undefined;
             return (
               <div className={`flex w-[50rem] ${isUser ? " justify-end" : "justify-start"}`}>
-                <div className={`rounded-2xl px-4 p-2 ${isUser && "max-w-[45rem] bg-secondery/30"}`}><ReactMarkdown remarkPlugins={[remarkGfm]}>{isUser ? chat.user : chat.ai}</ReactMarkdown></div>
+                <div className={`rounded-2xl px-4 p-2 ${isUser && "max-w-[45rem] bg-secondery/30"}`}>
+                  {/*<ReactMarkdown remarkPlugins={[remarkGfm]}>{isUser ? chat.user : chat.ai}</ReactMarkdown>*/}
+                  <p>{isUser ? chat.user : chat.ai}</p>
+                </div>
               </div>
             );
           })
