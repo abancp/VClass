@@ -6,7 +6,7 @@ from config.genai import model
 
 ai_bp = Blueprint('ai',__name__)
 
-@ai_bp.route('/gen',methods=['POST'])
+@ai_bp.route('/<class_id>/gen',methods=['POST'])
 @member_required
 def gen(userdata):
     try:
