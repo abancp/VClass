@@ -24,7 +24,7 @@ def member_required(f):
         except Exception as e:
             print(e)
             response = jsonify({"success": False, "message": "Something went wrong while Authenticating", "error": str(e)})
-            response.headers.add('Access-Control-Allow-Origin', 'https://vclass-xi.vercel.app')
+            response.headers.add('Access-Control-Allow-Origin', 'https://vclass-xi.vercel.app,http://localhost:3000')
             response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
             response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
             response.headers.add('Access-Control-Allow-Credentials', 'true')
