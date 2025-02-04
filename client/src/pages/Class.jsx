@@ -50,7 +50,7 @@ function ClassPage() {
         selected === 'peoples' && <Peoples id={id} />
       }
       {
-        selected === "vclass_ai" && <AIChat />
+        selected === "vclass_ai" && <AIChat id={id} />
       }
     </div>
   )
