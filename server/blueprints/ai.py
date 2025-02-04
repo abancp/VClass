@@ -8,7 +8,7 @@ ai_bp = Blueprint('ai',__name__)
 
 @ai_bp.route('/<class_id>/gen',methods=['POST'])
 @member_required
-def gen(userdata):
+def gen(class_id,userdata):
     try:
         data = request.get_json()
         system_prompt = "you are a ai assinstand for a virtual class named VClass . users asking questions by prompt. generate positive response depends on users role,name,and prompt"
