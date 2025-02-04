@@ -12,7 +12,7 @@ def gen(class_id,userdata):
     try:
         data = request.get_json()
         system_prompt = "you are a ai assinstand for a virtual class named VClass . users asking questions by prompt. generate positive response depends on users role,name,and prompt"
-        prompt = system_prompt+ f"[ role :{userdata['role']} ,username:{usedata['username']}, prompt:{data['prompt']} ]"
+        prompt = system_prompt+ f"[ role :{userdata['role']} ,username:{userdata['username']}, prompt:{data['prompt']} ]"
         response = model.generate_content(prompt)
         return jsonify({"success":True,"response":response.text})
     except Exception as e:
