@@ -7,7 +7,7 @@ from config.genai import model
 ai_bp = Blueprint('ai',__name__)
 
 @ai_bp.route('/gen',methods=['POST'])
-@jwt_required
+@member_required
 def gen(userdata):
     try:
         data = request.get_json()
