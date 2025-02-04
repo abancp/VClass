@@ -4,7 +4,7 @@ import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from "remark-gfm"
 
-function AIChat() {
+function AIChat({id}) {
   const [chats, setChats] = useState([])
   const [thinking, setThinking] = useState(false)
   const [prompt, setPrompt] = useState("")
@@ -15,7 +15,7 @@ function AIChat() {
     setPrompt("")
     setThinking(true)
     setChats((prev) => [...prev, { user: prompt }])
-    axios.post(SERVER_URL + "/ai/gen", { prompt: prompt }, { withCredentials: true })
+    axios.post(SERVER_URL + "/"+id+"/ai/gen", { prompt: prompt }, { withCredentials: true })
       .then(({ data }) => {
         if (data.success) {
           setThinking(false)
