@@ -143,13 +143,39 @@ function Works({ id, role }) {
               })}</h6>
             </div>
           </div>
-          <div className='border-b flex border-postedpostedpostedpostedpostedpostedpostedpostedpostedtersiory w-full'>
+          <div className='border-b flex border-tersiory w-full'>
             {role === "teacher" && <div onClick={() => setTab("instructions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "instructions" && "bg-secondery"}`}>Instructions</div>}
             {role === "teacher" && <div onClick={() => setTab("submissions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "submissions" && "bg-secondery"}`}>Submissions</div>}
           </div>
-          {tab === "instructions" && <div className={`px-5 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-11.9rem)]" : "h-[calc(100vh-13.9rem)]"}`}>
+          {tab === "instructions" && <div className={`px-5 flex flex-col gap-3 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-11.9rem)]" : "h-[calc(100vh-13.9rem)]"}`}>
             <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>
+            {selectedWork.type === "quiz" && selectedWork.quiz?.map((question, qi) => (
+              <div>
+                <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-2xl '>
+                  <div className='flex flex-col px-2 justify-between'>
+                    <div className='flex gap-2'>
+                      <h1 className='text-lg'>{(qi+1) +"  "+ question.question}</h1>
+                    </div>
+
+                    {
+                      question.type === "MCQ" && question.options?.map((option, oi) => (
+                        <div className=' flex  gap-2'>
+                          <input name={qi} value={option} type="radio" id={qi + "-" + oi} />
+                          <label className='cursor-pointer' for={qi + "-" + oi}>{option}</label>
+                        </div>
+                      ))
+                    }
+                  </div>
+
+                </div>
+              </div>
+            ))
+            }
+            <div className='w-full flex justify-center'>
+              <button className='w-fit rounded-md px-3 p-2 bg-tersiory text-lg'>Submit</button>
+            </div>
           </div>}
+
           {(tab === "submissions" && role === "teacher") &&
             <div className='flex h-full gap-3 w-full'>
               <div className='p-4 w-[30rem] flex flex-col gap-2'>
@@ -173,7 +199,7 @@ function Works({ id, role }) {
               </div>
             </div>
           }
-          {role === "student" &&
+          {(role === "student" && selectedWork.type === "assignment") &&
             <div className='flex w-full justify-center'>
               <div className={`rounded-2xl flex flex-col text-lg duration-200 items-center justify-end gap-1 p-1 ${showFileUploader ? "h-[4.3rem]" : "h-[2.3rem]"} bg-secondery/50`}>
                 {showFileUploader && <div className={` ${showFileUploader ? "h-[2rem]" : "h-0"} duration-300 flex justify-center`}>

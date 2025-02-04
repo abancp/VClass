@@ -11,7 +11,12 @@ module.exports = {
         tersiory: "#1192B8",
         light: "#B6EADA"
       },
-
+      /*colors: {
+        dark: "#ffffff",
+        secondery: "#eaeaea",
+        tersiory: "#1192B8",
+        light: "#000000"
+      },*/
       backgroundSize: {
         'size-200': '200% 200% 200% 200%',
       },
