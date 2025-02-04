@@ -15,7 +15,7 @@ function AIChat({id}) {
     setPrompt("")
     setThinking(true)
     setChats((prev) => [...prev, { user: prompt }])
-    axios.post(SERVER_URL + "/"+id+"/ai/gen", { prompt: prompt }, { withCredentials: true })
+    axios.post(SERVER_URL + "/ai/"+id+"/gen", { prompt: prompt }, { withCredentials: true })
       .then(({ data }) => {
         if (data.success) {
           setThinking(false)
