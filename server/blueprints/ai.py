@@ -11,7 +11,9 @@ ai_bp = Blueprint('ai',__name__)
 def gen(userdata):
     try:
         data = request.get_json()
-        response = model.generate_content(data['prompt'])
+        system_prompt = "you are a ai assinstand for a virtual class named VClass . users asking questions by prompt. generate positive response depends on users role,name,and prompt"
+        prompt = system_prompt+ f"\{role :{userdata['role']} ,username:{usedata['username']}, prompt:{data['prompt']}\}"
+        response = model.generate_content(prompt)
         return jsonify({"success":True,"response":response.text})
     except Exception as e:
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)})
