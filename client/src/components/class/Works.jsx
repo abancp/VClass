@@ -148,7 +148,8 @@ function Works({ id, role }) {
             {role === "teacher" && <div onClick={() => setTab("submissions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "submissions" && "bg-secondery"}`}>Submissions</div>}
           </div>
           {tab === "instructions" && <div className={`px-5 flex flex-col gap-3 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-11.9rem)]" : "h-[calc(100vh-13.9rem)]"}`}>
-            <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>
+            {/* <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>*/}
+            <p>{selectedWork.instruction}</>
             {selectedWork.type === "quiz" && selectedWork.quiz?.map((question, qi) => (
               <div>
                 <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-2xl '>
