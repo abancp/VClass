@@ -11,16 +11,16 @@ function AIChat({ id, chats, setChats }) {
   const handleGenerate = (e) => {
     e && e.preventDefault()
     if (thinking) return
-    setPrompt("")
     setThinking(true)
     setChats((prev) => [...prev, { user: prompt }])
     axios.post(SERVER_URL + "/ai/" + id + "/gen", { prompt: prompt }, { withCredentials: true })
       .then(({ data }) => {
         if (data.success) {
+          setPrompt("")
           setThinking(false)
           setChats((prev) => [...prev, { ai: data.response }])
         }
-      }).catch(() => { setThinking(false) })
+      }).catch(() => { setThinking(false);setPrompt("") })
   }
 
   const handleEnter = (e) => {
@@ -60,9 +60,9 @@ function AIChat({ id, chats, setChats }) {
 
             </div>
             <div className='w-full flex justify-center gap-3'>
-              <div onClick={()=>{setPrompt("How Many Assignments in this class");handleGenerate()}} className='p-2 px-3 cursor-pointer rounded-2xl border border-tersiory/80'>How Many </div>
-              <div className='p-2 px-3 cursor-pointer rounded-2xl border border-tersiory/80'>List the Students submitted Assignment-1</div>
-              <div className='p-2 px-3 cursor-pointer rounded-2xl border border-tersiory/80'>List Teachers</div>
+              <div onClick={()=>{setPrompt("How Many Assignments in this class")}} className='p-2 px-3 cursor-pointer rounded-2xl border border-tersiory/80'>How Many </div>
+              <div onClick={()=>{setPrompt("List the Students submitted Assignment-1")}} className='p-2 px-3 cursor-pointer rounded-2xl border border-tersiory/80'>List the Students submitted Assignment-1</div>
+              <div onClick={()=>{setPrompt("List all Teachers in this class")}} className='p-2 px-3 cursor-pointer rounded-2xl border border-tersiory/80'>List Teachers</div>
             </div>
           </div>
         }
