@@ -2,6 +2,7 @@ import axios from "axios"
 import { useNavigate, Link, useSearchParams } from "react-router"
 import { SERVER_URL } from "../config/SERVER_URL"
 import useStore from "../store/store"
+import {toast} from 'sonner'
 
 function Signup() {
   const state = useStore((state) => state)
@@ -10,8 +11,8 @@ function Signup() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (e.target.password.value === e.target.confirm_password.value) {
-      console.log("Password not matching!")
+    if (e.target.password.value !== e.target.confirm_password.value) {
+      return toast.error("Password not matching")
     }
     axios
       .post(SERVER_URL + "/register", {
@@ -30,7 +31,6 @@ function Signup() {
           navigate('/')
         }
       })
-
   }
 
   return <>

@@ -9,6 +9,8 @@ from bson import json_util
 from middlewares.memeber_required import member_required
 import os
 
+from utils import convert_objectid_to_string
+
 class_bp = Blueprint('class',__name__)
 
 
@@ -19,12 +21,12 @@ def create_class(userdata):
         unique_key = generate(size=6)
         data = request.get_json()
         data['students'] = []
-        data['teachers'] = [userdata['userid']]
+        data['teachers'] = [ObjectId(userdata['userid'])]
         data['key'] = unique_key
         data['number_of_students'] = 0
-        data['creater'] = userdata['userid']
+        data['creater'] = ObjectId(userdata['userid'])
         inserted_class = classes.insert_one(data)
-        users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"teacher":str(inserted_class.inserted_id)}})
+        users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"teacher":inserted_class.inserted_id}})
         userdata['roles'][str(inserted_class.inserted_id)] = "teacher"
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
 
@@ -46,12 +48,12 @@ def get_class(class_id,userdata):
 
         class_['_id'] = str(class_['_id'])
         del class_['students']
-
+        class_ = convert_objectid_to_string(class_)
         if userdata['userid'] not in class_['teachers']:
             del class_['teachers']
             del class_['key']
-            return jsonify({"success":True,"role":"student","class":class_}) 
-        return jsonify({"succes":True,"role":"teacher","class":class_})
+            return jsonify({"success":True,"role":"student","class":json_util.loads(json_util.dumps(class_))}) 
+        return jsonify({"succes":True,"role":"teacher","class":json_util.loads(json_util.dumps(class_))})
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}) , 500
@@ -64,24 +66,6 @@ def get_peoples(class_id,userdata):
     {
         "$match": {
             "_id": ObjectId(class_id)
-        }
-    },
-    {
-        "$addFields": {
-            "students": {
-                "$map": {
-                    "input": "$students",
-                    "as": "studentId",
-                    "in": { "$toObjectId": "$$studentId" }
-                }
-            },
-            "teachers": {
-                "$map": {
-                    "input": "$teachers",
-                    "as": "teacherId",
-                    "in": { "$toObjectId": "$$teacherId" }
-                }
-            }
         }
     },
     {
@@ -142,10 +126,10 @@ def join_class(userdata):
             return jsonify({"success":False,"message":"class not found"}),404
         user = users.find_one({"_id":userObjectId},{"student":1,"teacher":1})
         print(user,found_class['_id'])
-        if str(found_class['_id']) in user['student'] or str(found_class['_id']) in user['student']:
+        if found_class['_id'] in user['student'] or found_class['_id'] in user['student']:
             return jsonify({"success":False,"message":"users already joined","classid":str(found_class['_id'])}),409
-        users.update_one({"_id":userObjectId},{"$push":{"student":str(found_class['_id'])}})
-        classes.update_one({"_id":found_class['_id']},{"$push":{"students":str(userdata['userid'])},"$inc":{"number_of_students":1}})
+        users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
+        classes.update_one({"_id":found_class['_id']},{"$push":{"students":userdata['userid']},"$inc":{"number_of_students":1}})
         userdata['roles'][str(found_class['_id'])] = "student"
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
         res =  make_response(jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"}))  
@@ -166,17 +150,6 @@ def get_classes(userdata):
         "$set": {
             "combined_roles": {
                 "$concatArrays": ["$student", "$teacher"]
-            }
-        }
-    },
-    {
-        "$addFields": {
-            "combined_roles": {
-                "$map": {
-                    "input": "$combined_roles",
-                    "as": "class_id",
-                    "in": {"$toObjectId": "$$class_id"}  # Convert class IDs to ObjectId
-                }
             }
         }
     },

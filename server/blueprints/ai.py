@@ -13,7 +13,9 @@ def gen(class_id,userdata):
         data = request.get_json()
         system_prompt = "you are a ai assinstand for a virtual class named VClass . users asking questions by prompt. generate positive response depends on users role,name,and prompt"
         prompt = system_prompt+ f"[ role :{userdata['role']} ,username:{userdata['username']}, prompt:{data['prompt']} ]"
-        response = model.generate_content(prompt)
+        response = model.generate_content(data['prompt'])
+        if response.text.startswith("```python"):
+            print(response.text.removeprefix("```python ").removesuffix("```"))
         return jsonify({"success":True,"response":response.text})
     except Exception as e:
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)})

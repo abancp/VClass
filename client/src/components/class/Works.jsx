@@ -56,7 +56,8 @@ function Works({ id, role }) {
 
 
   const handleSubmitWork = () => {
-    axios.post(SERVER_URL + "/work/submit/" + id + "/" + selectedWork._id.$oid, { url: fileLink }, { withCredentials: true })
+    //data = selectedWork.type === "quiz"? { url: fileLink, } 
+    axios.post(SERVER_URL + "/work/submit/" + id + "/" + selectedWork._id.$oid,{ url: fileLink }, { withCredentials: true })
       .then(({ data }) => {
         if (data.success) {
           toast.success("Submitted . your teacher will check that!")
@@ -135,7 +136,7 @@ function Works({ id, role }) {
                 month: 'numeric',
                 day: 'numeric'
               })}</h6>
-              <h6 className='font-light text-[14px]' >posted : {new Date(selectedWork.due_date).toLocaleString('en-US', {
+              <h6 className='font-light text-[14px]' >due date: {new Date(selectedWork.due_date).toLocaleString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'numeric',
@@ -155,7 +156,7 @@ function Works({ id, role }) {
                 <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-2xl '>
                   <div className='flex flex-col px-2 justify-between'>
                     <div className='flex gap-2'>
-                      <h1 className='text-lg'>{(qi+1) +"  "+ question.question}</h1>
+                      <h1 className='text-lg'>{(qi + 1) + "  " + question.question}</h1>
                     </div>
 
                     {
@@ -173,7 +174,6 @@ function Works({ id, role }) {
             ))
             }
             <div className='w-full flex justify-center'>
-              <button className='w-fit rounded-md px-3 p-2 bg-tersiory text-lg'>Submit</button>
             </div>
           </div>}
 
@@ -198,6 +198,12 @@ function Works({ id, role }) {
                 ))
                 }
               </div>
+            </div>
+          }
+          {
+            (role === "student" && selectedWork.type === "quiz") &&
+            <div>
+              <button onCLick={handleSubmitWork} className='w-fit rounded-md px-3 p-2 bg-tersiory text-lg'>Submit</button>
             </div>
           }
           {(role === "student" && selectedWork.type === "assignment") &&

@@ -15,7 +15,8 @@ work_bp = Blueprint('work',__name__)
 def create_work(work_type,userdata):
     try:
         data = request.get_json()
-        data['teacher'] = userdata['userid']
+        data['teacher'] = ObjectId(userdata['userid'])
+        data['class_id'] = ObjectId(data['class_id'])
         data['teacher_name'] = userdata['username']
         data['type'] = work_type
         data['accept_submits'] = True
@@ -32,7 +33,7 @@ def create_work(work_type,userdata):
 def get_works(class_id,userdata):
     try:
         skip = request.args.get('skip',default=0,type=int)
-        works_data = works.find({"class_id":class_id}).sort({"time":-1}).limit(10).skip(skip)
+        works_data = works.find({"class_id":ObjectId(class_id)}).sort({"time":-1}).limit(10).skip(skip)
         return jsonify({"success":True,"works":json.loads(json_util.dumps(works_data))})
     except Exception as e:
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)})
@@ -45,7 +46,7 @@ def submit_work(class_id,work_id,userdata):
             print(userdata)
             data = request.get_json()
             time = int(datetime.datetime.now().timestamp()*1000)
-            count = submits.count_documents({"work_id":work_id,"user_id":userdata['userid']})
+            count = submits.count_documents({"work_id":ObjectId(work_id),"user_id":ObjectId(userdata['userid'])})
             print("count",count)
             work = works.find_one({"_id":ObjectId(work_id)},{'submit_limit':1,'auto_delete':1,'accept_submits':1,'due_date':1})
             if not work['accept_submits']:
@@ -54,7 +55,7 @@ def submit_work(class_id,work_id,userdata):
                 return jsonify({"success":False,"message":"time end for this work!"})
             if count > 0:
                 return jsonify({"success":False,"message":"you allready submitted!"})
-            submits.insert_one({"work_id":work_id,"class_id":class_id,"data":data,"time":time,"user_id":userdata['userid']})
+            submits.insert_one({"work_id":ObjectId(work_id),"class_id":ObjectId(class_id),"user_id":ObjectId(userdata['userid']),"data":data,"time":time})
             return jsonify({"success":True,"message":"Work submitted!"})
         except Exception as e :
             print(e)

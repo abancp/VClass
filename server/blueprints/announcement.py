@@ -4,6 +4,7 @@ from middlewares.memeber_required import member_required
 from config.mongodb import anns
 import json
 from bson import json_util
+from bson.objectid import ObjectId
 
 ann_bp = Blueprint('ann',__name__)
 
@@ -12,8 +13,9 @@ ann_bp = Blueprint('ann',__name__)
 def create_ann(userdata):
     try:
         data = request.get_json()
+        data['class_id'] = ObjectId(data['class_id'])
+        data['user_id'] = ObjectId(userdata['userid'])
         data['time'] = int(datetime.now().timestamp()*1000)
-        data['user_id'] = userdata['userid']
         data['username'] = userdata['username']
         anns.insert_one(data)
         return jsonify({"success":True,"message":"announcement created"})
@@ -25,7 +27,7 @@ def create_ann(userdata):
 def get_work(class_id,userdata):
     try:
         skip = request.args.get('skip',default=0,type=int)
-        works_data = anns.find({"class_id":class_id}).sort({"time":-1}).limit(10).skip(skip)
+        works_data = anns.find({"class_id":ObjectId(class_id)}).sort({"time":-1}).limit(10).skip(skip)
         return jsonify({"success":True,"anns":json.loads(json_util.dumps(works_data))})
     except:
         return jsonify({"success":False,"message":"something went wrong!"}) , 500
