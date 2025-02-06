@@ -43,7 +43,7 @@ function Login() {
           <div className="flex flex-col gap-3 text-center">
             <h1 className="text-3xl font-bold ">Login</h1>
             <p>Login VClass</p>
-            <p>already have an account <Link className="underline text-blue-600" to={searchParams.get('to') ? "/signup?to=join&name=" + searchParams.get('name') + '&key=' + searchParams.get('key') : "/signup"} >signup here</Link></p>
+            <p>dont have an account <Link className="underline text-blue-600" to={searchParams.get('to') ? "/signup?to=join&name=" + searchParams.get('name') + '&key=' + searchParams.get('key') : "/signup"} >signup here</Link></p>
 
           </div>
           <h2 className="font-semibold text-xl ">OR Continue with</h2>
@@ -54,7 +54,8 @@ function Login() {
         </div>
         <div className="h-[90%] opacity-90 border-l border-black"></div>
         <div className="w-1/2 h-ull flex flex-col justify-center gap-3 items-center">
-          <form onSubmit={handleSubmit} method="post" className="text-dark w-full h-full flex flex-col justify-center gap-3 items-center">
+          <form onSubmit=
+            {handleSubmit} method="post" className="text-dark w-full h-full flex flex-col justify-center gap-3 items-center">
             <input name="email" placeholder="email" type="email" className="w-[70%] rounded-full h-[2rem] px-3 font-semibold text-lg border border-black" />
             <input name="password" placeholder="password" type="password" className="w-[70%] rounded-full h-[2rem] px-3 font-semibold text-lg border border-black" />
             <input type="submit" value="submit" className=" text-light w-[70%] hover:text-white hover:bg-tersiory duration-300 rounded-full h-[2rem] px-3 font-semibold cursor-pointer text-lg border border-black" />
