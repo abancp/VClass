@@ -58,9 +58,9 @@ def login():
     print(user) 
     roles = {}
     for class_id in user['teacher']:
-        roles[class_id] = 'teacher'
+        roles[str(class_id)] = 'teacher'
     for class_id in user['student']:
-        roles[class_id] = 'student'
+        roles[str(class_id)] = 'student'
     #create jwt token
     token = jwt.encode({
         "userid":str(user['_id']),
@@ -87,7 +87,4 @@ def get_userdata():
         return jsonify({"success":True,"username":data['username']})
     except:
         return jsonify({"success":False}) , 401
-
-
-
 

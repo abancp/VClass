@@ -1,3 +1,4 @@
+import re
 from bson import ObjectId
 
 def convert_objectid_to_string(doc):
@@ -10,3 +11,5 @@ def convert_objectid_to_string(doc):
         return str(doc)
     else:
         return doc
+def is_valid_ObjectId(value):
+    return isinstance(value,str) and re.fullmatch(r"^[a-fA-F0-9]{24}$",value)

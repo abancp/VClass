@@ -11,6 +11,7 @@ import Sidebar from '../components/main/Sidebar'
 import { SERVER_URL } from '../config/SERVER_URL'
 //TODO : Navigate sidebar tabes throgh urls 
 function ClassPage() {
+  const [chats, setChats] = useState([])
   const [searchParams] = useSearchParams()
   const [classData, setClassData] = useState({})
   const { id } = useParams()
@@ -50,7 +51,7 @@ function ClassPage() {
         selected === 'peoples' && <Peoples id={id} />
       }
       {
-        selected === "vclass_ai" && <AIChat id={id} />
+        selected === "vclass_ai" && <AIChat chats={chats} setChats={setChats} id={id} />
       }
     </div>
   )

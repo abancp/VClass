@@ -4,8 +4,7 @@ import axios from 'axios'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from "remark-gfm"
 
-function AIChat({id}) {
-  const [chats, setChats] = useState([])
+function AIChat({id,chats,setChats}) {
   const [thinking, setThinking] = useState(false)
   const [prompt, setPrompt] = useState("")
 
