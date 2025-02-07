@@ -130,7 +130,7 @@ function Works({ id, role }) {
             </svg>
             <h1 className='text-2xl  text-center font-semibold'>{selectedWork.title}</h1>
             <div className='text-md font-thin'>
-              <h6 className='font-light text-[14px]' >posted : {new Date(selectedWork.due_date).toLocaleString('en-US', {
+              <h6 className='font-light text-[14px]' >posted : {new Date(selectedWork.time).toLocaleString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'numeric',

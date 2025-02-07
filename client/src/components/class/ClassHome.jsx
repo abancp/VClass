@@ -36,6 +36,8 @@ function ClassHome({ id, classData, role }) {
       .then(({ data }) => {
         if (data.success) {
           setTypedAnnounce("")
+          setAnnSkip(0)
+          setAnns(data.anns)
           console.log("Announced")
         }
       })

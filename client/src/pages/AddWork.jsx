@@ -85,9 +85,7 @@ function AddWork() {
         }
       case "quiz": {
         if (selectedStudents.length === 0) return toast.error("Select atleast one student")
-        let dueDateUnix = new Date(dueDate)
-        dueDateUnix.setUTCHours(23, 59, 59, 999)
-        dueDateUnix = dueDateUnix.getTime()
+        let dueDateUnix = new Date(dueDate).setUTCHours(23, 59, 59, 999)
         axios.post(SERVER_URL + "/work/add/quiz",
           {
             class_id: id,

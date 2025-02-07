@@ -129,8 +129,9 @@ def join_class(userdata):
         if found_class['_id'] in user['student'] or found_class['_id'] in user['student']:
             return jsonify({"success":False,"message":"users already joined","classid":str(found_class['_id'])}),409
         users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
-        classes.update_one({"_id":found_class['_id']},{"$push":{"students":userdata['userid']},"$inc":{"number_of_students":1}})
+        classes.update_one({"_id":found_class['_id']},{"$push":{"students":ObjectId(userdata['userid'])},"$inc":{"number_of_students":1}})
         userdata['roles'][str(found_class['_id'])] = "student"
+        print(userdata)
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
         res =  make_response(jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"}))  
         res.set_cookie('token',token,max_age=360000)

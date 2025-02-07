@@ -5,18 +5,18 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
+      /*colors: {
         dark: "#120f18",
         secondery: "#2a243e",
         tersiory: "#1192B8",
         light: "#B6EADA"
-      },
-      /*colors: {
-        dark: "#ffffff",
-        secondery: "#eaeaea",
-        tersiory: "#1192B8",
-        light: "#000000"
       },*/
+      colors: {
+        dark: "#ffffff",
+        secondery: "#a7de83",
+        tersiory: "#1192B8",
+        light: "#120f18"
+      },
       backgroundSize: {
         'size-200': '200% 200% 200% 200%',
       },
