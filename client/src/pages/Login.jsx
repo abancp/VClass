@@ -36,7 +36,7 @@ function Login() {
   }
 
   return <>
-    <div className="min-h-screen pt-header justify-center text-light bg-dark flex items-center w-100 ">
+    <div className="min-h-screen pt-header justify-center text-dark bg-dark flex items-center w-100 ">
       <Header />
       <div className="border border-black bg-secondery w-[50rem] h-[23rem] justify-between items-center flex rounded-md">
         <div className="w-1/2 gap-3 h-full flex flex-col justify-center items-center">

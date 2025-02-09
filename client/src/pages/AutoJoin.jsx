@@ -38,7 +38,7 @@ function AutoJoin() {
 
   }, [navigate, params])
   return (
-    <div>
+    <div className='w-screen h-screen text-tersiory bg-dark'>
       Joining... , Redirecting...
     </div>
   )

@@ -6,6 +6,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from 'axios';
 import { SERVER_URL } from '../config/SERVER_URL';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 function AddWork() {
   const { type, id } = useParams()
@@ -21,6 +22,7 @@ function AddWork() {
       ''
     ],
     'answer': '',
+    'mark': 5
   }])
   const [students, setStudents] = useState([])
   const [selectedStudents, setSelectedStudents] = useState(['*'])
@@ -143,11 +145,16 @@ function AddWork() {
             </div>
           }
           {type.toLowerCase() === "quiz" && quiz.map((q, i) => (
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: -50, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.8 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
               <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
-                <div className='flex flex-col px-2 justify-between'>
+                <div className='flex flex-col gap-1 px-2 justify-between'>
                   <div className='flex gap-2'>
-                    <input
+                    <textarea
                       placeholder={'Question ' + (i + 1)}
                       value={q.question}
                       onChange={(e) => {
@@ -155,32 +162,119 @@ function AddWork() {
                           p.map((q0, i0) => i0 === i ? { ...q0, question: e.target.value } : q0)
                         )
                       }}
-                      className='font-semibold border-b border-transparent focus:outline-none hover:border-tersiory/30 focus:border-b-2 border-b focus:border-tersiory bg-transparent w-full p-1' />
-                    <select className='bg-transparent'>
-                      <option value="MCQ" className='bg-dark'>MCQ</option>
-                    </select>
+                      className='font-semibold border-b border-secondery focus:outline-none hover:border-tersiory/30 focus:border-b-2 border-b focus:border-tersiory bg-transparent w-full p-1 min-h-[4rem]' ></textarea>
+                    <div className='flex h-[4rem] flex-col justify-between'>
+                      <select
+                        onChange={(e) => setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, type: e.target.value } : q0))}
+
+                        className='bg-transparent'
+                      >
+                        <option selected={q.type === "MCQ"} value="MCQ" className='bg-dark'>MCQ</option>
+                        <option selected={q.type === "SHORT"} value="SHORT" className='bg-dark'>Short</option>
+                        <option selected={q.type === "DESCRIPTIVE"} value="DESCRIPTIVE" className='bg-dark'>Descriptive</option>
+                      </select>
+                      <input
+                        value={q.mark}
+                        onChange={(e) => setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, mark: Number(e.target.value) } : q0))}
+                        placeholder='mark'
+                        className=' border-b border-secondery focus:outline-none hover:border-tersiory/30 focus:border-b-2 border-b focus:border-tersiory bg-transparent w-[7rem] p-1'
+                        type="number" />
+                    </div>
+
                   </div>
 
                   {
                     q.type === "MCQ" && q.options.map((option, optionI) => (
+                      <div className='flex '>
+                        <input
+                          defaultChecked={optionI===0?true:false}
+                          onChange={(e) => {
+                            setQuiz((p) =>
+                              p.map((q0, i1) =>
+                                i1 === i ? {
+                                  ...q0, answer:option
+                                } : q0
+                              ))
+                          }
+                          }
+                          type="radio" name={i + "ANS"} />
+                        <input
+                          placeholder={"Option " + (optionI + 1)}
+                          className=' border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'
+                          value={option}
+                          onChange={(e) => {
+                            setQuiz((p) =>
+                              p.map((q0, i1) =>
+                                i1 === i ? {
+                                  ...q0, options: q0.options.map((op0, j) =>
+                                    (j === optionI ? e.target.value : op0))
+                                } : q0
+                              ))
+                          }
+                          }
+                        />
+                      </div>
+                    ))
+                  }
+                  {
+                    q.type === "SHORT" &&
+                    <div>
                       <input
-                        placeholder={"Option " + (optionI + 1)}
+                        placeholder='answer'
                         className='font-semibold border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'
-                        value={option}
                         onChange={(e) => {
                           setQuiz((p) =>
                             p.map((q0, i1) =>
                               i1 === i ? {
-                                ...q0, options: q0.options.map((op0, j) =>
-                                  (j === optionI ? e.target.value : op0))
+                                ...q0, answer: e.target.value
                               } : q0
                             ))
                         }
                         }
                       />
-                    ))
+                      <div className='flex gap-1'>
+                        <input
+                          placeholder='case_sensitive'
+                          type="checkbox"
+                          id={i + " SHORT"}
+                          onChange={(e) => {
+                            setQuiz((p) =>
+                              p.map((q0, i1) =>
+                                i1 === i ? {
+                                  ...q0, answer: e.target.value
+                                } : q0
+                              ))
+                          }}
+                        />
+                        <label htmlFor={i + " SHORT"} >case sensitive</label>
+                      </div>
+
+                    </div>
+
                   }
-                  <h4 onClick={() => { setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, options: [...q0.options, ''] } : q0)) }} className='w-full cursor-pointer duration-200 hover:underline hover:text-tersiory pl-2'>Add option</h4>
+                  {
+                    q.type === "DESCRIPTIVE" &&
+                    <div>
+                      <textarea
+                        placeholder='answer'
+                        className='font-semibold border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'
+
+                      ></textarea>
+                      <div className='flex gap-1'>
+                        <input
+                          defaultChecked
+                          placeholder='ai_evaluate'
+                          type="checkbox"
+                          id={i + " DESC"}
+                        />
+                        <label htmlFor={i + " DESK"} >evaluate with ai</label>
+                      </div>
+                    </div>
+                  }
+                  {q.type === "MCQ" && <h4 onClick={() => { setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, options: [...q0.options, ''] } : q0)) }} className='w-full cursor-pointer duration-200 hover:underline hover:text-tersiory pl-2'>Add option</h4>}
+                  <div className='flex gap-2 items-center'>
+                    <input type="checkbox" defaultChecked id={i + "-REQUIRED"} /><label htmlFor={i + "-REQUIRED"}>required</label>
+                  </div>
 
                 </div>
               </div>
@@ -191,7 +285,7 @@ function AddWork() {
                 }}
                   className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
               </div>
-            </div>
+            </motion.div>
           ))
           }
         </div>

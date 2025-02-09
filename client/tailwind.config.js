@@ -5,17 +5,17 @@ module.exports = {
   ],
   theme: {
     extend: {
-      /*colors: {
+      colors: {
         dark: "#120f18",
         secondery: "#2a243e",
         tersiory: "#1192B8",
         light: "#B6EADA"
-      },*/
-      colors: {
+      },
+      wcolors: {
         dark: "#ffffff",
-        secondery: "#a7de83",
+        secondery: "#eeeeee",
         tersiory: "#1192B8",
-        light: "#120f18"
+        light: "#00000"
       },
       backgroundSize: {
         'size-200': '200% 200% 200% 200%',

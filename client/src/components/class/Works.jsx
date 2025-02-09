@@ -21,6 +21,8 @@ function Works({ id, role }) {
   const [acceptSubmits, setAcceptSubmits] = useState(true)
   const [acceptSubmitsSaving, setAcceptSubmitsSaving] = useState(false)
   const [submits, setSubmits] = useState([])
+  const [quiz, setQuiz] = useState({})
+  const [totalStudents, setTotalStudents] = useState(0)
 
   useEffect(() => {
     if (workFetch && worksSkip === 0) {
@@ -35,6 +37,9 @@ function Works({ id, role }) {
     })
   }, [worksSkip, workFetch, id])
 
+  useEffect(() => {
+    console.log(quiz)
+  }, [quiz])
 
   useEffect(() => {
     if (!showWork || role === "student") return
@@ -42,6 +47,8 @@ function Works({ id, role }) {
       .then(({ data }) => {
         if (data.success) {
           setSubmits(data.submits)
+          console.log(data.submits)
+          setTotalStudents(data.total_students)
         }
       })
   }, [showWork, selectedWork, id, role])
@@ -56,8 +63,15 @@ function Works({ id, role }) {
 
 
   const handleSubmitWork = () => {
-    //data = selectedWork.type === "quiz"? { url: fileLink, } 
-    axios.post(SERVER_URL + "/work/submit/" + id + "/" + selectedWork._id.$oid,{ url: fileLink }, { withCredentials: true })
+    if (!window.confirm("Are you sure to submit ?")) return
+    let response = {}
+    if (selectedWork.type === "assignment") {
+      response = { url: fileLink }
+    } else if (selectedWork.type === "quiz") {
+      response = quiz
+    }
+    console.log(response)
+    axios.post(SERVER_URL + "/work/submit/" + id + "/" + selectedWork._id.$oid, response, { withCredentials: true })
       .then(({ data }) => {
         if (data.success) {
           toast.success("Submitted . your teacher will check that!")
@@ -149,23 +163,39 @@ function Works({ id, role }) {
             {role === "teacher" && <div onClick={() => setTab("submissions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "submissions" && "bg-secondery"}`}>Submissions</div>}
           </div>
           {tab === "instructions" && <div className={`px-5 flex flex-col gap-3 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-11.9rem)]" : "h-[calc(100vh-13.9rem)]"}`}>
-            {/* <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>*/}
-            <p>{selectedWork.instruction}</p>
+            <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>
             {selectedWork.type === "quiz" && selectedWork.quiz?.map((question, qi) => (
               <div>
                 <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-2xl '>
                   <div className='flex flex-col px-2 justify-between'>
-                    <div className='flex gap-2'>
+                    <div className='flex gap-2 justify-between'>
                       <h1 className='text-lg'>{(qi + 1) + "  " + question.question}</h1>
+                      <h3>({question.mark})</h3>
                     </div>
 
                     {
                       question.type === "MCQ" && question.options?.map((option, oi) => (
                         <div className=' flex  gap-2'>
-                          <input name={qi} value={option} type="radio" id={qi + "-" + oi} />
+                          <input onChange={(e) => { setQuiz((p) => ({ ...p, [qi]: e.target.value })) }} name={qi} value={option} type="radio" id={qi + "-" + oi} />
                           <label className='cursor-pointer' for={qi + "-" + oi}>{option}</label>
                         </div>
                       ))
+                    }
+
+                    {
+                      question.type === "SHORT" &&
+                      <div className=' flex  gap-2'>
+                        <input className='font-semibold border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'
+                          onChange={(e) => { setQuiz((p) => ({ ...p, [qi]: e.target.value })) }} name={qi} />
+                      </div>
+                    }
+                    {
+                      question.type === "DESCRIPTIVE" &&
+                      <div className=' flex  gap-2'>
+                        <textarea
+                          className='font-semibold border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'
+                          onChange={(e) => { setQuiz((p) => ({ ...p, [qi]: e.target.value })) }} name={qi} ></textarea>
+                      </div>
                     }
                   </div>
 
@@ -173,37 +203,54 @@ function Works({ id, role }) {
               </div>
             ))
             }
-            <div className='w-full flex justify-center'>
-            </div>
+            {
+              (role === "student" && selectedWork.type === "quiz") &&
+              <div className='w-full flex justify-center'>
+                <button onClick={handleSubmitWork} className='w-fit rounded-md px-3 p-2 bg-tersiory text-lg'>Submit</button>
+              </div>
+            }
           </div>}
 
           {(tab === "submissions" && role === "teacher") &&
             <div className='flex h-full gap-3 w-full'>
               <div className='p-4 w-[30rem] flex flex-col gap-2'>
-                <h1 className='text-2xl font-semibold text-tersiory'><span className='text-green-600'>10</span>/30 Submitted</h1>
+                <h1 className='text-2xl font-semibold text-tersiory'><span className='text-green-600'>{submits.length}</span>/{totalStudents} Submitted</h1>
                 <div className='flex items-center  gap-2'>
                   <Switch checked={acceptSubmits} height={20} width={48} onChange={handleChangeAcceptSubmits} />
                   {acceptSubmitsSaving && <p>saving...</p>}
                   <h4>accepting submissions</h4>
                 </div>
-
               </div>
 
-              <div className='p-2 flex flex-col gap-3 w-fit h-full'>
-                <h1 className='text-2xl font-semibold'>Submissions</h1>
-                {submits.map((submit) => (
-                  <div className='rounded-md w-[14rem] p-2 bg-secondery'>
-                    <h1>{submit.username}</h1>
-                  </div>
-                ))
-                }
+              <div className='relative rounded-md p-2  w-[36rem] h-full'>
+                <div className='w-full text-left rounded-md'>
+                  <table className='rounded-md w-full' border={1}>
+                    <thead className='rounded-md uppercase gap-3 bg-tersiory'>
+                      <tr className='rounded-md' >
+                        <th scope='col' className='py-3 px-6'>Student</th>
+                        <th scope='col' className='py-3 px-6'>Work</th>
+                        <th scope='col' className='py-3 px-6'>Date</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {submits.map((submit) => (
+                        <tr className='odd:bg-secondery/40 border-b border-tersiory/70'>
+                          <td className='py-3 px-6'>{submit.username}</td>
+                          <tr className='py-3 px-6  flex items-center'><a rel='noreferrer' className={` ${submit.response?.url && "text-blue-500 hover:underline"} `} target="_blank" href={submit.response?.url}>view</a></tr>
+                          <td className='py-3 px-6'>{new Date(submit.time).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric'
+                          })}</td>
+                        </tr>
+                      ))
+                      }
+                    </tbody>
+
+                  </table>
+                </div>
               </div>
-            </div>
-          }
-          {
-            (role === "student" && selectedWork.type === "quiz") &&
-            <div>
-              <button onCLick={handleSubmitWork} className='w-fit rounded-md px-3 p-2 bg-tersiory text-lg'>Submit</button>
             </div>
           }
           {(role === "student" && selectedWork.type === "assignment") &&
@@ -229,7 +276,7 @@ function Works({ id, role }) {
         </>
 
       }
-    </div>
+    </div >
 
   )
 }

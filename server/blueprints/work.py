@@ -43,19 +43,33 @@ def get_works(class_id,userdata):
 @student_required
 def submit_work(class_id,work_id,userdata):
         try:
-            print(userdata)
             data = request.get_json()
             time = int(datetime.datetime.now().timestamp()*1000)
             count = submits.count_documents({"work_id":ObjectId(work_id),"user_id":ObjectId(userdata['userid'])})
-            print("count",count)
-            work = works.find_one({"_id":ObjectId(work_id)},{'submit_limit':1,'auto_delete':1,'accept_submits':1,'due_date':1})
+            work = works.find_one({"_id":ObjectId(work_id)})
             if not work['accept_submits']:
                 return jsonify({"success":False,"message":"the work is not accepting submissions now!"})
             if work['due_date'] < int(datetime.datetime.now().timestamp() *1000):
                 return jsonify({"success":False,"message":"time end for this work!"})
             if count > 0:
                 return jsonify({"success":False,"message":"you allready submitted!"})
-            submits.insert_one({"work_id":ObjectId(work_id),"class_id":ObjectId(class_id),"user_id":ObjectId(userdata['userid']),"data":data,"time":time})
+            mark = 0
+            marks = {}
+            if work['type'] == "quiz":
+                for question_index,question in enumerate(work['quiz']):
+                    print(data)
+                    print(question_index,question)
+                    if 'answer' in question and str(question_index) in data:
+                        if question['type'] == "MCQ":
+                            if data[str(question_index)] == question['answer']:
+                                marks[str(question_index)] = question['mark']
+                                mark+=question['mark']
+                        elif question['type'] == "SHORT":
+                            if data[str(question_index)].lower() == question['answer'].lower():
+                                marks[str(question_index)] = question['mark']
+                                mark+=question['mark']
+            print(mark) 
+            submits.insert_one({"work_id":ObjectId(work_id),"class_id":ObjectId(class_id),"user_id":ObjectId(userdata['userid']),"response":data,"marks":marks,"time":time})
             return jsonify({"success":True,"message":"Work submitted!"})
         except Exception as e :
             print(e)
@@ -66,6 +80,10 @@ def submit_work(class_id,work_id,userdata):
 def get_work(class_id,work_id,userdata):
     try:
         work = works.find_one({"_id":ObjectId(work_id)})
+        if 'quiz' in work:
+            for q in work['quiz']:
+                if 'answer' in q:
+                    del q['answer']
         class_ = classes.find_one({"_id":ObjectId(class_id)},{"name":1})
         if userdata['role'] == "teacher":
             return jsonify({"success":True,"work":json.loads(json_util.dumps(work))})
@@ -83,7 +101,7 @@ def get_submits(class_id,work_id,userdata):
         submissions = submits.aggregate([
     {
         "$match": {
-            "work_id": work_id
+            "work_id": ObjectId(work_id)
         }
     },
     {
@@ -107,14 +125,16 @@ def get_submits(class_id,work_id,userdata):
             "data": 1,
             "time": 1,
             "user_id": 1,
+            "response":1,
             "username": "$user_info.username" 
             }
     }
 ])
         print(submissions)
+        class_ = classes.find_one({"_id":ObjectId(class_id)},{"number_of_students":1})
         if not submissions:
             return jsonify({"success":True,"submits":[]})
-        return jsonify({"success":True,"submits":json.loads(json_util.dumps(submissions))})
+        return jsonify({"success":True,"submits":json.loads(json_util.dumps(submissions)),"total_students":class_['number_of_students']})
     except Exception as e:
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)})
 
