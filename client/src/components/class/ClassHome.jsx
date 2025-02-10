@@ -4,8 +4,9 @@ import { SERVER_URL } from '../../config/SERVER_URL'
 import { toast } from 'sonner'
 import { QRCode } from 'react-qrcode-logo'
 import NoticeBoard from '../main/NoticeBoard'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import Scrollbars from 'react-custom-scrollbars-2'
+import CreateResourcesPopup from '../popup/CreateResourcesPopup'
 
 function ClassHome({ id, classData, role }) {
 
@@ -13,6 +14,7 @@ function ClassHome({ id, classData, role }) {
   const [typedAnnounce, setTypedAnnounce] = useState()
   const [anns, setAnns] = useState([])
   const [annSkip, setAnnSkip] = useState(0)
+  const [showCreateSrcPopup, setShowCreateSrcPopup] = useState(false)
 
   useEffect(() => {
     axios.get(SERVER_URL + "/ann/anns/" + id + "?skip=" + annSkip, { withCredentials: true }).then(({ data }) => {
@@ -60,8 +62,11 @@ function ClassHome({ id, classData, role }) {
 
 
   return (
-    < main className='p-4 flex gap-8 justify-center items-start' >
-      <div className="flex flex-col gap-3">
+    < main className='p-4 flex gap-4 justify-center items-start' >
+      <AnimatePresence>
+        {showCreateSrcPopup && <CreateResourcesPopup handleClose={() => { setShowCreateSrcPopup(false) }} />}
+      </AnimatePresence>
+      <div className="flex flex-col gap-4">
         {role === "teacher" &&
           < motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -109,11 +114,16 @@ function ClassHome({ id, classData, role }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeOut", bounce: 0.3 }}
-            className={`w-[15rem] border-2 border-dotted border border-tersiory/30 transition-all  p-3 bg-secondery/20 rounded-2xl flex flex-col gap-3 duration-100 `}>
-            <div className='flex gap-2 flex-col justify-center items-start justify-between'>
-              <h1 className=" text-lg font-semibold">Upload Resuorces</h1>
+            className={`w-[15rem] border-2 border-dotted border border-tersiory/30 transition-all  p-3 bg-secondery/20 rounded-2xl items-center justify-center flex-col gap-3 duration-100 `}
+            onClick={() => { setShowCreateSrcPopup(true) }}
+          >
+            <div className='cursor-pointer hover:bg-opacity-80 group flex gap-2 flex-col justify-center items-center justify-between'>
+              <h1 className="text-left w-full  text-lg font-semibold">Upload Resuorces</h1>
+              <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" fill="currentColor" className="bi duration-300 group-hover:text-tersiory text-tersiory/50 bi-plus-square-dotted" viewBox="0 0 16 16">
+                <path d="M2.5 0q-.25 0-.487.048l.194.98A1.5 1.5 0 0 1 2.5 1h.458V0zm2.292 0h-.917v1h.917zm1.833 0h-.917v1h.917zm1.833 0h-.916v1h.916zm1.834 0h-.917v1h.917zm1.833 0h-.917v1h.917zM13.5 0h-.458v1h.458q.151 0 .293.029l.194-.981A2.5 2.5 0 0 0 13.5 0m2.079 1.11a2.5 2.5 0 0 0-.69-.689l-.556.831q.248.167.415.415l.83-.556zM1.11.421a2.5 2.5 0 0 0-.689.69l.831.556c.11-.164.251-.305.415-.415zM16 2.5q0-.25-.048-.487l-.98.194q.027.141.028.293v.458h1zM.048 2.013A2.5 2.5 0 0 0 0 2.5v.458h1V2.5q0-.151.029-.293zM0 3.875v.917h1v-.917zm16 .917v-.917h-1v.917zM0 5.708v.917h1v-.917zm16 .917v-.917h-1v.917zM0 7.542v.916h1v-.916zm15 .916h1v-.916h-1zM0 9.375v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .916v.917h1v-.917zm16 .917v-.917h-1v.917zm-16 .917v.458q0 .25.048.487l.98-.194A1.5 1.5 0 0 1 1 13.5v-.458zm16 .458v-.458h-1v.458q0 .151-.029.293l.981.194Q16 13.75 16 13.5M.421 14.89c.183.272.417.506.69.689l.556-.831a1.5 1.5 0 0 1-.415-.415zm14.469.689c.272-.183.506-.417.689-.69l-.831-.556c-.11.164-.251.305-.415.415l.556.83zm-12.877.373Q2.25 16 2.5 16h.458v-1H2.5q-.151 0-.293-.029zM13.5 16q.25 0 .487-.048l-.194-.98A1.5 1.5 0 0 1 13.5 15h-.458v1zm-9.625 0h.917v-1h-.917zm1.833 0h.917v-1h-.917zm1.834-1v1h.916v-1zm1.833 1h.917v-1h-.917zm1.833 0h.917v-1h-.917zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3z" />
+              </svg>
             </div>
-                        
+
           </motion.div>
 
         }
@@ -122,7 +132,7 @@ function ClassHome({ id, classData, role }) {
         {/*<NoticeBoard notices={[{ notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" },
         { notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" }
         ]} />*/}
-        <Scrollbars onScroll={handleAnnsScroll}>
+        <Scrollbars style={{ "zIndex": 0 }} onScroll={handleAnnsScroll}>
           <form onSubmit={handleAnnounce} className='bg-secondery flex gap-1 justify-center items-center w-full rounded-md border border-tersiory/50  p-1'>
             <input name="announce" value={typedAnnounce} onChange={(e) => { setTypedAnnounce(e.target.value) }} placeholder='Type to announce something ..' className='w-full bg-transparent/50 border rounded-md p-1 focus:outline-none border-tersiory/50' />
             <button type='submit' className=''>
