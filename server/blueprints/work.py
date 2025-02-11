@@ -54,6 +54,7 @@ def submit_work(class_id,work_id,userdata):
             if count > 0:
                 return jsonify({"success":False,"message":"you allready submitted!"})
             mark = 0
+            complete_val = True
             marks = {}
             if work['type'] == "quiz":
                 for question_index,question in enumerate(work['quiz']):
@@ -68,8 +69,14 @@ def submit_work(class_id,work_id,userdata):
                             if data[str(question_index)].lower() == question['answer'].lower():
                                 marks[str(question_index)] = question['mark']
                                 mark+=question['mark']
+                        else:
+                            complete_val = False
+            elif work['type'] == "assignment":
+                complete_val = False 
+                            
+                            
             print(mark) 
-            submits.insert_one({"work_id":ObjectId(work_id),"class_id":ObjectId(class_id),"user_id":ObjectId(userdata['userid']),"response":data,"marks":marks,"time":time})
+            submits.insert_one({"work_id":ObjectId(work_id),"class_id":ObjectId(class_id),"user_id":ObjectId(userdata['userid']),"response":data,"marks":marks,"mark":mark,"complete_val":complete_val,"time":time})
             return jsonify({"success":True,"message":"Work submitted!"})
         except Exception as e :
             print(e)
@@ -126,6 +133,9 @@ def get_submits(class_id,work_id,userdata):
             "time": 1,
             "user_id": 1,
             "response":1,
+            "complete_val":1,
+            "mark":1,
+            "marks":1,
             "username": "$user_info.username" 
             }
     }

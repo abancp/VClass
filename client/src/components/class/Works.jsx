@@ -230,6 +230,7 @@ function Works({ id, role }) {
                       <tr className='rounded-md' >
                         <th scope='col' className='py-3 px-6'>Student</th>
                         <th scope='col' className='py-3 px-6'>Work</th>
+                        <th scope='col' className='py-3 px-6'>Mark</th>
                         <th scope='col' className='py-3 px-6'>Date</th>
                       </tr>
                     </thead>
@@ -238,7 +239,8 @@ function Works({ id, role }) {
                       {submits.map((submit) => (
                         <tr className='odd:bg-secondery/40 border-b border-tersiory/70'>
                           <td className='py-3 px-6'>{submit.username}</td>
-                          <tr className='py-3 px-6  flex items-center'><a rel='noreferrer' className={` ${submit.response?.url && "text-blue-500 hover:underline"} `} target="_blank" href={submit.response?.url}>view</a></tr>
+                          <td className='py-3 px-6  flex items-center'><a rel='noreferrer' className={` ${submit.response?.url && "text-blue-500 hover:underline"} `} target="_blank" href={submit.response?.url}>view</a></td>
+                          <td className={`py3   px-6 ${submit.complete_val || " text-tersiory"}`}>{submit.complete_val ? submit.mark : "processing"}</td>
                           <td className='py-3 px-6'>{new Date(submit.time).toLocaleString('en-US', {
                             year: 'numeric',
                             month: 'numeric',

@@ -10,10 +10,10 @@ import { motion } from 'framer-motion';
 
 function AddWork() {
   const { type, id } = useParams()
-  const [dueDate, setDueDate] = useState(new Date())
   const navigate = useNavigate()
 
-
+  const [dueDate, setDueDate] = useState(new Date())
+  const [totalMark, setTotalMark] = useState(1)
   const [quiz, setQuiz] = useState([{
     question: '',
     type: 'MCQ',
@@ -22,7 +22,7 @@ function AddWork() {
       ''
     ],
     'answer': '',
-    'mark': 5
+    'mark': 1
   }])
   const [students, setStudents] = useState([])
   const [selectedStudents, setSelectedStudents] = useState(['*'])
@@ -175,7 +175,10 @@ function AddWork() {
                       </select>
                       <input
                         value={q.mark}
-                        onChange={(e) => setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, mark: Number(e.target.value) } : q0))}
+                        onChange={(e) => {
+                          setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, mark: Number(e.target.value) } : q0));
+                        }
+                        }
                         placeholder='mark'
                         className=' border-b border-secondery focus:outline-none hover:border-tersiory/30 focus:border-b-2 border-b focus:border-tersiory bg-transparent w-[7rem] p-1'
                         type="number" />
@@ -187,12 +190,12 @@ function AddWork() {
                     q.type === "MCQ" && q.options.map((option, optionI) => (
                       <div className='flex '>
                         <input
-                          defaultChecked={optionI===0?true:false}
+                          defaultChecked={optionI === 0 ? true : false}
                           onChange={(e) => {
                             setQuiz((p) =>
                               p.map((q0, i1) =>
                                 i1 === i ? {
-                                  ...q0, answer:option
+                                  ...q0, answer: option
                                 } : q0
                               ))
                           }
