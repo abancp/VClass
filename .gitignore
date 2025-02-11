@@ -1,4 +1,4 @@
 client/node_modules
 server/.venv
 server/.env
-ai/.venv
+ai/
