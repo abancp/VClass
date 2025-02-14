@@ -8,3 +8,4 @@ bcrypt
 nanoid
 gunicorn
 google.generativeai
+b2sdk
