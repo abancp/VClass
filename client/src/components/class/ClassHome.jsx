@@ -7,14 +7,20 @@ import NoticeBoard from '../main/NoticeBoard'
 import { AnimatePresence, motion } from 'framer-motion'
 import Scrollbars from 'react-custom-scrollbars-2'
 import CreateResourcesPopup from '../popup/CreateResourcesPopup'
+import ReactPlayer from 'react-player'
+import CheckAnimation from '../sub/CheckAnimation'
+import GetSVG from '../sub/GetSVG'
 
 function ClassHome({ id, classData, role }) {
-
   const [showQRCode, setShowQRCode] = useState(false)
   const [typedAnnounce, setTypedAnnounce] = useState()
   const [anns, setAnns] = useState([])
   const [annSkip, setAnnSkip] = useState(0)
   const [showCreateSrcPopup, setShowCreateSrcPopup] = useState(false)
+  const [srcs, setSrcs] = useState([])
+  const [selectedSrcIndex, setSelectedSrcIndex] = useState(0)
+  const [srcsRefresh, setSrcsRefresh] = useState(Date.now())
+  const [downloadUrl, setDownloadUrl] = useState()
 
   useEffect(() => {
     axios.get(SERVER_URL + "/ann/anns/" + id + "?skip=" + annSkip, { withCredentials: true }).then(({ data }) => {
@@ -24,6 +30,28 @@ function ClassHome({ id, classData, role }) {
       }
     })
   }, [annSkip, id])
+
+  useEffect(() => {
+    if (!srcs[selectedSrcIndex]?.url) return
+    setDownloadUrl("")
+    axios.get(SERVER_URL + "/src/" + id + "/get-file-url/" + srcs[selectedSrcIndex]?.url, { withCredentials: true }).then(({ data }) => {
+      console.log(data)
+      if (data.success) {
+        setDownloadUrl(data.download_url)
+      }
+    })
+  }, [selectedSrcIndex, srcs, id])
+
+  useEffect(() => {
+    axios.get(SERVER_URL + "/src/srcs/" + id + "?limit=20", { withCredentials: true }).then(({ data }) => {
+      console.log(data)
+      if (data.success) {
+        console.log("Fetched srcs")
+        setSrcs(data.srcs)
+        console.log(data)
+      }
+    })
+  }, [id, srcsRefresh])
 
   const handleAnnsScroll = (e) => {
     const { offsetHeight, scrollTop, scrollHeight } = e.target
@@ -47,6 +75,8 @@ function ClassHome({ id, classData, role }) {
       })
   }
 
+
+
   const handleCopyJoinUrl = () => {
     navigator.clipboard.writeText(window.document.location.origin + "/join?name=" + classData.name + "&key=" + classData.key)
     toast.success("Copied to Clipboard!")
@@ -64,7 +94,7 @@ function ClassHome({ id, classData, role }) {
   return (
     < main className='p-4 flex gap-4 justify-center items-start' >
       <AnimatePresence>
-        {showCreateSrcPopup && <CreateResourcesPopup handleClose={() => { setShowCreateSrcPopup(false) }} />}
+        {showCreateSrcPopup && <CreateResourcesPopup handleRefresh={() => { setSrcsRefresh(Date.now()) }} id={id} handleClose={() => { setShowCreateSrcPopup(false) }} />}
       </AnimatePresence>
       <div className="flex flex-col gap-4">
         {role === "teacher" &&
@@ -127,45 +157,100 @@ function ClassHome({ id, classData, role }) {
           </motion.div>
 
         }
+        {
+          srcs.map((src, i) => (
+            <div onClick={() => { setSelectedSrcIndex(i) }} className="w-[15rem] cursor-pointer transition-all h-full relative bg-secondery/50 rounded-2xl items-center  justify-center flex-col gap-3 duration-100"
+            >
+              <div className={`w-full h-full rounded-2xl hover:backdrop-blur-md hover:bg-secondery/30 duration-300 ${src?.type === "url/yt" ? " hover:text-light text-transparent " : "  hidden "} absolute flex text-xl  items-center justify text-sm text-center font-semibol`}>{src.title}</div>     {src.type === "url/yt" ?
+                <img className='rounded-2xl' alt={src?.title} src={`https://img.youtube.com/vi/${src?.url}/maxresdefault.jpg
+`} />
+                :
+                <div className='flex p-3 pr-1 justify-between items-center rounded-2xl bg-secondery/60'>
+                  <div className='text-lg '>{src?.title}</div>
+                  <div className='rounded-md h-fit p-1 w-fit text-tersiory '><GetSVG type={src?.type?.split("/")[1]}/></div>
+                </div>
+              }
+            </div>
+          ))
+        }
+
       </div>
-      <div className='w-[48rem] flex bg-secondery/50 p-2 rounded-2xl h-[20rem] flex-col gap-2'>
+      <div className='w-[48rem] flex  p-2 pb-1 pt-0 rounded-2xl  flex-col gap-4'>
         {/*<NoticeBoard notices={[{ notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" },
         { notice: "Schools opening today", teacher: "Aban Muhammed C P", date: "12/12/2024" }
         ]} />*/}
-        <Scrollbars style={{ "zIndex": 0 }} onScroll={handleAnnsScroll}>
-          <form onSubmit={handleAnnounce} className='bg-secondery flex gap-1 justify-center items-center w-full rounded-md border border-tersiory/50  p-1'>
-            <input name="announce" value={typedAnnounce} onChange={(e) => { setTypedAnnounce(e.target.value) }} placeholder='Type to announce something ..' className='w-full bg-transparent/50 border rounded-md p-1 focus:outline-none border-tersiory/50' />
-            <button type='submit' className=''>
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className={`bi bi-send rounded-md  cursor-pointer ${typedAnnounce ? "text-tersiory/70 hover:text-tersiory" : "text-dark "} duration-300 `} viewBox="0 0 16 16">
-                <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
-              </svg>
-            </button>
-          </form>
-          <div className='flex justify-between my-1'>
-            <h1 className='font-semibold'>Recent Announcements  </h1>
-            <svg onClick={() => { refetchAnns() }} xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className="text-tersiory cursor-pointer hover:rotate-[720deg] duration-[1s] bi bi-arrow-clockwise" viewBox="0 0 16 16">
-              <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
-              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
-            </svg>
+        {
+          (srcs?.length >= selectedSrcIndex + 1) &&
+          <div
+            className="w-full   bg-secondery/50 rounded-2xl"
+          >
+            <div className='h-[2rem] flex justify-start items-center text-lg font-semibold text-left p-2 '>{srcs[selectedSrcIndex]?.title}</div>
+            {/*<img alt={srcs[0]?.title} src={`https://img.youtube.com/vi/${srcs[0]?.url}/maxresdefault.jpg
+`} />*/}
+            {srcs[selectedSrcIndex]?.type === "url/yt" ?
+              <iframe
+                className="w-full h-[26.45rem] rounded-b-2xl "
+                src={"https://www.youtube.com/embed/" + srcs[selectedSrcIndex]?.url}
+                title="YouTube Video Player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+              :
+              (srcs[selectedSrcIndex]?.type?.endsWith("jpeg") || srcs[selectedSrcIndex]?.type?.endsWith("png") === "") ?
+                <img
+                  className="w-full  rounded-b-2xl "
+                  src={downloadUrl}
+                  alt={srcs[selectedSrcIndex]?.title}
+                />
+                :
+                <iframe
+                  className="w-full h-[26.45rem] rounded-b-2xl "
+                  src={downloadUrl}
+                  title="Media Player"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+            }
+
+
           </div>
-          {
-            anns.map((ann) => (
-              <div className=' flex my-2 flex-col gap-1 w-full rounded-md  border border-tersiory/50  p-4'>
-                <h1 className='font-semibold flex justify-between' >{ann.username}<span className='ml-2 opacity-90 text-sm font-thin'>{new Date(ann.time).toLocaleString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'numeric',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  hour12: true
-                })}
-                </span> </h1>
-                <p className='w-full break-words overflow-wrap'>{ann.announce}</p>
-              </div>
-            ))
-          }
-        </Scrollbars>
+        }
+        <div className='bg-secondery/50 p-2 rounded-2xl h-[25rem]'>
+          <Scrollbars style={{ "zIndex": 0 }} onScroll={handleAnnsScroll}>
+            <form onSubmit={handleAnnounce} className='bg-secondery flex gap-1 justify-center items-center w-full rounded-2xl  p-1'>
+              <input name="announce" value={typedAnnounce} onChange={(e) => { setTypedAnnounce(e.target.value) }} placeholder='Type to announce something ..' className='w-full bg-transparent/50   rounded-2xl p-1 px-2 focus:outline-none ' />
+              <button type='submit' className=''>
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className={`bi bi-send rounded-md  cursor-pointer ${typedAnnounce ? "text-tersiory/70 hover:text-tersiory" : "text-dark "} duration-300 `} viewBox="0 0 16 16">
+                  <path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576zm6.787-8.201L1.591 6.602l4.339 2.76z" />
+                </svg>
+              </button>
+            </form>
+            <div className='flex justify-between my-1'>
+              <h1 className='font-semibold'>Recent Announcements  </h1>
+              <svg onClick={() => { refetchAnns() }} xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className="text-tersiory cursor-pointer hover:rotate-[720deg] duration-[1s] bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+              </svg>
+            </div>
+            {
+              anns.map((ann) => (
+                <div className=' flex my-2 flex-col gap-1 w-full rounded-2xl bg-secondery/80  p-4'>
+                  <h1 className='font-semibold flex justify-between' >{ann.username}<span className='ml-2 opacity-90 text-sm font-thin'>{new Date(ann.time).toLocaleString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: true
+                  })}
+                  </span> </h1>
+                  <p className='w-full break-words overflow-wrap'>{ann.announce}</p>
+                </div>
+              ))
+            }
+          </Scrollbars>
+        </div>
 
       </div>
     </main >

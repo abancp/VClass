@@ -11,7 +11,7 @@ module.exports = {
         tersiory: "#1192B8",
         light: "#B6EADA"
       },
-      wcolors: {
+      Wcolors: {
         dark: "#ffffff",
         secondery: "#eeeeee",
         tersiory: "#1192B8",

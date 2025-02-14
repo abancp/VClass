@@ -22,6 +22,7 @@ def member_required(f):
                 return jsonify({"success":False,"message":"Auth failed","error":"role not matching"}) , 401
 
         except Exception as e:
+            print("Exception in muddleware")
             print(e)
             response = jsonify({"success": False, "message": "Something went wrong while Authenticating", "error": str(e)})
             response.headers.add('Access-Control-Allow-Origin', 'https://vclass-xi.vercel.app,http://localhost:3000')

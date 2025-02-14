@@ -126,7 +126,7 @@ def join_class(userdata):
             return jsonify({"success":False,"message":"class not found"}),404
         user = users.find_one({"_id":userObjectId},{"student":1,"teacher":1})
         print(user,found_class['_id'])
-        if found_class['_id'] in user['student'] or found_class['_id'] in user['student']:
+        if found_class['_id'] in user['teacher'] or found_class['_id'] in user['student']:
             return jsonify({"success":False,"message":"users already joined","classid":str(found_class['_id'])}),409
         users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
         classes.update_one({"_id":found_class['_id']},{"$push":{"students":ObjectId(userdata['userid'])},"$inc":{"number_of_students":1}})

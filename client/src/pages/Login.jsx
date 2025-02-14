@@ -36,9 +36,9 @@ function Login() {
   }
 
   return <>
-    <div className="min-h-screen pt-header justify-center text-dark bg-dark flex items-center w-100 ">
+    <div className="min-h-screen pt-header justify-center text-light bg-dark flex items-center w-100 ">
       <Header />
-      <div className="border border-black bg-secondery w-[50rem] h-[23rem] justify-between items-center flex rounded-md">
+      <div className="border border-black bg-secondery w-[50rem] h-[23rem] justify-between items-center flex rounded-2xl">
         <div className="w-1/2 gap-3 h-full flex flex-col justify-center items-center">
           <div className="flex flex-col gap-3 text-center">
             <h1 className="text-3xl font-bold ">Login</h1>
@@ -52,13 +52,26 @@ function Login() {
             <div className=" bg-blue-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">Facebook</div>
           </div>
         </div>
-        <div className="h-[90%] opacity-90 border-l border-black"></div>
+        <div className="h-[90%] opacity-90 border-l border-light/50"></div>
         <div className="w-1/2 h-ull flex flex-col justify-center gap-3 items-center">
           <form onSubmit=
             {handleSubmit} method="post" className="text-dark w-full h-full flex flex-col justify-center gap-3 items-center">
-            <input name="email" placeholder="email" type="email" className="w-[70%] rounded-full h-[2rem] px-3 font-semibold text-light text-lg border border-black" />
-            <input name="password" placeholder="password" type="password" className="w-[70%] rounded-full h-[2rem] px-3 font-semibold text-light text-lg border border-black" />
-            <input type="submit" value="submit" className=" text-light w-[70%] hover:text-white hover:bg-tersiory duration-300 rounded-full h-[2rem] px-3 font-semibold cursor-pointer text-lg border border-black" />
+            <input
+              name="email"
+              placeholder='email'
+              className=' border-b text-light border-secondery focus:outline-none border-tersiory/60 focus:border-b-2 border-b focus:border-tersiory bg-transparent w-[70%] p-1'
+              type="email" />
+            <input
+              name="password"
+              placeholder='password'
+              className=' border-b text-light cursor-pointer border-secondery focus:outline-none border-tersiory/60 focus:border-b-2 border-b focus:border-tersiory bg-transparent w-[70%] p-1'
+              type="password" />
+
+            <input
+              name="submit"
+              placeholder='submit'
+              className=' border-b border-secondery focus:outline-none   bg-tersiory rounded-md w-[70%] p-1'
+              type="submit" />
           </form>
         </div>
       </div>

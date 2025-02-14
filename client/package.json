@@ -5,6 +5,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
+    "backblaze-b2": "^1.7.0",
     "cra-template": "1.2.0",
     "framer-motion": "^12.4.1",
     "multiselect-react-dropdown": "^2.0.25",
@@ -14,8 +15,10 @@
     "react-custom-scrollbars-2": "^4.5.0",
     "react-datepicker": "^7.6.0",
     "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.5",
     "react-markdown": "^9.0.3",
     "react-perfect-scrollbar": "^1.5.8",
+    "react-player": "^2.16.0",
     "react-qrcode-logo": "^3.0.0",
     "react-router": "^7.1.1",
     "react-scripts": "5.0.1",
