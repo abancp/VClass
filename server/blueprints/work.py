@@ -7,6 +7,7 @@ from middlewares.student_required import student_required
 from middlewares.teacher_required import teacher_required
 import json
 from bson.objectid import ObjectId
+from config.rabbitmq import channel
 
 work_bp = Blueprint('work',__name__)
 
@@ -51,7 +52,7 @@ def submit_work(class_id,work_id,userdata):
                 return jsonify({"success":False,"message":"the work is not accepting submissions now!"})
             if work['due_date'] < int(datetime.datetime.now().timestamp() *1000):
                 return jsonify({"success":False,"message":"time end for this work!"})
-            if count > 0:
+            if count > 0 and not work['can_edit']:
                 return jsonify({"success":False,"message":"you allready submitted!"})
             mark = 0
             complete_val = True
@@ -66,16 +67,28 @@ def submit_work(class_id,work_id,userdata):
                                 marks[str(question_index)] = question['mark']
                                 mark+=question['mark']
                         elif question['type'] == "SHORT":
-                            if data[str(question_index)].lower() == question['answer'].lower():
-                                marks[str(question_index)] = question['mark']
-                                mark+=question['mark']
+                            if 'case_sensitive' in question and question['case_sensitive']:
+                                if data[str(question_index)] == question['answer']:
+                                    marks[str(question_index)] = question['mark']
+                                    mark+=question['mark']
+                            else:
+                                if data[str(question_index)].lower() == question['answer'].lower():
+                                    marks[str(question_index)] = question['mark']
+                                    mark+=question['mark']
+
+                                
+                        elif question['type'] == "DESCRIPTIVE":
+                            channel.basic_publish(exchange='', routing_key='Descriptive_Q', body=json.dumps({"correct":question['answer'],"student":data[str(question_index)],"index":question_index,"work_id":work_id,"user_id":userdata['userid'],"mark":question['mark']}))
+                            print(" [x] Passed to Descriptive Evaluation AI")
+                            complete_val = False
                         else:
                             complete_val = False
             elif work['type'] == "assignment":
                 complete_val = False 
                             
-                            
-            print(mark) 
+            print(mark)
+            if count > 0:
+                submits.deleteMany({"work_id":ObjectId(work_id),"user_id":ObjectId(userdata['userid'])})
             submits.insert_one({"work_id":ObjectId(work_id),"class_id":ObjectId(class_id),"user_id":ObjectId(userdata['userid']),"response":data,"marks":marks,"mark":mark,"complete_val":complete_val,"time":time})
             return jsonify({"success":True,"message":"Work submitted!"})
         except Exception as e :

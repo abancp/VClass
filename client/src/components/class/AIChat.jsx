@@ -56,8 +56,8 @@ function AIChat({ id, chats, setChats }) {
 
                   className={`flex w-[50rem] ${isUser ? " justify-end" : "justify-start"}`}>
                   <div className={`rounded-2xl px-4 p-2 ${isUser && "max-w-[45rem] bg-secondery/30"}`}>
-                    {/*<ReactMarkdown remarkPlugins={[remarkGfm]}>{isUser ? chat.user : chat.ai}</ReactMarkdown>*/}
-                    <h4>{isUser ? chat.user : chat.ai}</h4>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{isUser ? chat.user : chat.ai}</ReactMarkdown>
+                    {/*<h4>{isUser ? chat.user : chat.ai}</h4>*/}
                   </div>
                 </motion.div>
               );

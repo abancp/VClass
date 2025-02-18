@@ -1,1 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Finger+Paint&display=swap');
+.rbc-calendar {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.rbc-event {
+  background-color: #4f46e5 !important;
+  color: white !important;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.rbc-toolbar {
+  background: #4f46e5;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.rbc-toolbar button {
+  color: white !important;
+  background: none;
+  border: none;
+}
+
+.rbc-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+}
+

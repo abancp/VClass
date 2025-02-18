@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: "class",
   theme: {
     extend: {
       colors: {
@@ -15,7 +16,7 @@ module.exports = {
         dark: "#ffffff",
         secondery: "#eeeeee",
         tersiory: "#1192B8",
-        light: "#00000"
+        light: "#120f18"
       },
       backgroundSize: {
         'size-200': '200% 200% 200% 200%',

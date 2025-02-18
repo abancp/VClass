@@ -6,6 +6,7 @@ from blueprints.auth import auth_bp
 from blueprints.class_bp import class_bp
 from blueprints.announcement import ann_bp
 from blueprints.work import work_bp
+from blueprints.event import event_bp 
 from blueprints.ai import ai_bp
 from blueprints.resources import src_bp
 from dotenv import load_dotenv
@@ -38,6 +39,7 @@ app.register_blueprint(work_bp,url_prefix='/work')
 app.register_blueprint(ann_bp,url_prefix='/ann')
 app.register_blueprint(ai_bp,url_prefix='/ai')
 app.register_blueprint(src_bp,url_prefix='/src')
+app.register_blueprint(event_bp,url_prefix='/event')
 
 with app.app_context():
     try:

@@ -22,7 +22,8 @@ function AddWork() {
       ''
     ],
     'answer': '',
-    'mark': 1
+    'mark': 1,
+    'required': true,
   }])
   const [students, setStudents] = useState([])
   const [selectedStudents, setSelectedStudents] = useState(['*'])
@@ -139,7 +140,8 @@ function AddWork() {
           {type.toLowerCase() === "quiz" &&
             <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
               <div onClick={() => {
-                setQuiz((p) => [{ question: '', type: 'MCQ', options: ['', ''] }, ...p])
+                setQuiz((p) => [{ question: '', type: 'MCQ', options: ['', ''], required: true }, ...p])
+
               }}
                 className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
             </div>
@@ -244,7 +246,7 @@ function AddWork() {
                             setQuiz((p) =>
                               p.map((q0, i1) =>
                                 i1 === i ? {
-                                  ...q0, answer: e.target.value
+                                  ...q0, case_sensitive: e.target.checked
                                 } : q0
                               ))
                           }}
@@ -261,6 +263,16 @@ function AddWork() {
                       <textarea
                         placeholder='answer'
                         className='font-semibold border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'
+                        id={i + " SHORT"}
+                        onChange={(e) => {
+                          setQuiz((p) =>
+                            p.map((q0, i1) =>
+                              i1 === i ? {
+                                ...q0, answer: e.target.value
+                              } : q0
+                            ))
+                        }}
+
 
                       ></textarea>
                       <div className='flex gap-1'>
@@ -269,6 +281,14 @@ function AddWork() {
                           placeholder='ai_evaluate'
                           type="checkbox"
                           id={i + " DESC"}
+                          onChange={(e) => {
+                            setQuiz((p) =>
+                              p.map((q0, i1) =>
+                                i1 === i ? {
+                                  ...q0, ai_evaluate: e.target.checked
+                                } : q0
+                              ))
+                          }}
                         />
                         <label htmlFor={i + " DESK"} >evaluate with ai</label>
                       </div>
@@ -276,7 +296,18 @@ function AddWork() {
                   }
                   {q.type === "MCQ" && <h4 onClick={() => { setQuiz((p) => p.map((q0, i0) => i0 === i ? { ...q0, options: [...q0.options, ''] } : q0)) }} className='w-full cursor-pointer duration-200 hover:underline hover:text-tersiory pl-2'>Add option</h4>}
                   <div className='flex gap-2 items-center'>
-                    <input type="checkbox" defaultChecked id={i + "-REQUIRED"} /><label htmlFor={i + "-REQUIRED"}>required</label>
+
+                    <input
+                      onChange={(e) => {
+                        setQuiz((p) =>
+                          p.map((q0, i1) =>
+                            i1 === i ? {
+                              ...q0, required: e.target.checked
+                            } : q0
+                          ))
+                      }}
+
+                      type="checkbox" defaultChecked id={i + "-REQUIRED"} /><label htmlFor={i + "-REQUIRED"}>required</label>
                   </div>
 
                 </div>
@@ -284,7 +315,7 @@ function AddWork() {
 
               <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
                 <div onClick={() => {
-                  setQuiz((p) => [...p.slice(0, i + 1), { question: '', type: 'MCQ', options: ['', ''] }, ...p.slice(i + 1)])
+                  setQuiz((p) => [...p.slice(0, i + 1), { question: '', type: 'MCQ', options: ['', ''], required: true }, ...p.slice(i + 1)])
                 }}
                   className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
               </div>

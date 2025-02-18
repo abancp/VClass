@@ -103,17 +103,17 @@ function ClassHome({ id, classData, role }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeOut", bounce: 0.3 }}
-            className={`w-[15rem] transition-all ${showQRCode ? "h-[24.5rem]" : "h-[9.9rem]"} p-3 bg-secondery/50 rounded-2xl flex flex-col gap-3 duration-100 `}>
+            className={`w-[15rem] transition-all ${showQRCode ? "h-[24.5rem]" : "h-[9.9rem]"} p-3 light:bg-light-secondery/50 bg-secondery/50 rounded-2xl flex flex-col gap-3 duration-100 `}>
             <div className='flex gap-2 flex-col justify-center items-start justify-between'>
               <h1 className=" text-lg font-semibold">Class Key</h1>
               <div className='flex justify-between items-center w-full'>
                 <div onClick={handleCopyJoinUrl} className='flex group items-center gap-1 text-tersiory cursor-pointer'>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="bi p-1 rounded-md bi-copy duration-300 group-hover:bg-secondery" viewBox="0 0 16 16">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="bi p-1 rounded-md bi-copy duration-300 group-hover:group-hover:bg-secondery" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M4 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1zM2 5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-1h1v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h1v1z" />
                   </svg>
                   <h1 className=" text-lg font-semibold">  copy invite link</h1>
                 </div>
-                <svg onClick={() => { setShowQRCode((p) => !p) }} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className={`bi bi-qr-code duration-300 text-tersiory cursor-pointer rounded-md p-1  ${showQRCode ? "bg-secondery" : "bg-transparent"} hover:bg-secondery`} viewBox="0 0 16 16">
+                <svg onClick={() => { setShowQRCode((p) => !p) }} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className={`bi bi-qr-code duration-300 text-tersiory cursor-pointer rounded-md p-1  ${showQRCode ? "bg-secondery" : "bg-transparent"} :bg-light-secondery hover:bg-secondery`} viewBox="0 0 16 16">
                   <path d="M2 2h2v2H2z" />
                   <path d="M6 0v6H0V0zM5 1H1v4h4zM4 12H2v2h2z" />
                   <path d="M6 10v6H0v-6zm-5 1v4h4v-4zm11-9h2v2h-2z" />
@@ -161,13 +161,13 @@ function ClassHome({ id, classData, role }) {
           srcs.map((src, i) => (
             <div onClick={() => { setSelectedSrcIndex(i) }} className="w-[15rem] cursor-pointer transition-all h-full relative bg-secondery/50 rounded-2xl items-center  justify-center flex-col gap-3 duration-100"
             >
-              <div className={`w-full h-full rounded-2xl hover:backdrop-blur-md hover:bg-secondery/30 duration-300 ${src?.type === "url/yt" ? " hover:text-light text-transparent " : "  hidden "} absolute flex text-xl  items-center justify text-sm text-center font-semibol`}>{src.title}</div>     {src.type === "url/yt" ?
+              <div className={`w-full h-full rounded-2xl hover:backdrop-blur-md hover:light:bg-light-secondery/30 hover:bg-secondery/30 duration-300 ${src?.type === "url/yt" ? " hover:text-light text-transparent " : "  hidden "} absolute flex text-xl  items-center justify text-sm text-center font-semibol`}>{src.title}</div>     {src.type === "url/yt" ?
                 <img className='rounded-2xl' alt={src?.title} src={`https://img.youtube.com/vi/${src?.url}/maxresdefault.jpg
 `} />
                 :
                 <div className='flex p-3 pr-1 justify-between items-center rounded-2xl bg-secondery/60'>
                   <div className='text-lg '>{src?.title}</div>
-                  <div className='rounded-md h-fit p-1 w-fit text-tersiory '><GetSVG type={src?.type?.split("/")[1]}/></div>
+                  <div className='rounded-md h-fit p-1 w-fit text-tersiory '><GetSVG type={src?.type?.split("/")[1]} /></div>
                 </div>
               }
             </div>
@@ -196,6 +196,7 @@ function ClassHome({ id, classData, role }) {
                 allowFullScreen
               ></iframe>
               :
+
               (srcs[selectedSrcIndex]?.type?.endsWith("jpeg") || srcs[selectedSrcIndex]?.type?.endsWith("png") === "") ?
                 <img
                   className="w-full  rounded-b-2xl "
@@ -203,13 +204,25 @@ function ClassHome({ id, classData, role }) {
                   alt={srcs[selectedSrcIndex]?.title}
                 />
                 :
-                <iframe
-                  className="w-full h-[26.45rem] rounded-b-2xl "
-                  src={downloadUrl}
-                  title="Media Player"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+                srcs[selectedSrcIndex]?.type?.startsWith("url") ?
+                  srcs[selectedSrcIndex]?.url?.endsWith(".pdf") ?
+                    <iframe
+                      className="w-full h-[26.45rem] rounded-b-2xl "
+                      src={srcs[selectedSrcIndex]?.url}
+                      title="Media Player"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                    :
+                    <div className='bg-secondery text-center text-blue-600 underline rounded-2xl p-2'><a target="_blank" rel='noreferrer' href={srcs[selectedSrcIndex]?.url}>{srcs[selectedSrcIndex]?.url}</a></div>
+                  :
+                  <iframe
+                    className="w-full h-[26.45rem] rounded-b-2xl "
+                    src={downloadUrl}
+                    title="Media Player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
             }
 
 

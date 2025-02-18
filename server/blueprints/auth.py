@@ -70,7 +70,7 @@ def login():
     },str(os.getenv("JWT_SECRET")),algorithm='HS256')
 
     #set cookie and response
-    res = make_response(jsonify({"message":"user registered successfully : "+user['username'],"username":user['username']}))
+    res = make_response(jsonify({"message":"user login successfully : "+user['username'],"username":user['username']}))
     res.set_cookie('token',token,max_age=360000,secure=True,samesite="None")
     return res
 

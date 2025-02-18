@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.rbc-month-view {
+  border: 1px solid #1192B8 !important; /* Change the whole table's border */
+}
+
+.rbc-day-bg {
+  border: 1px solid #1192B8 !important; /* Change cell borders */
+}
+
+.rbc-time-view, 
+.rbc-agenda-view {
+  border: 1px solid #1192B8 !important; /* Change borders for time and agenda views */
+}
+
+/* Default Dark Theme (when no class is applied) */
+:root {
+  --color-dark: 18, 15, 24; /* Equivalent to #120f18 */
+  --color-secondary: 42, 36, 62; /* #2a243e */
+  --color-tertiary: 17, 146, 184; /* #1192B8 */
+  --color-light: 182, 234, 218; /* #B6EADA */
+}
+
+/* Light Theme (When `.light` class is applied to <html>) */
+.light {
+  --color-dark: 255, 255, 255; /* White */
+  --color-secondary: 238, 238, 238; /* #eeeeee */
+  --color-tertiary: 17, 146, 184; /* Same as dark */
+  --color-light: 18, 15, 24; /* Darkest */
+}
+
+
+

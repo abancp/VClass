@@ -159,12 +159,12 @@ function Works({ id, role }) {
             </div>
           </div>
           <div className='border-b flex border-tersiory w-full'>
-            {role === "teacher" && <div onClick={() => setTab("instructions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "instructions" && "bg-secondery"}`}>Instructions</div>}
-            {role === "teacher" && <div onClick={() => setTab("submissions")} className={`p-2 duration-300 hover:bg-secondery/40 cursor-pointer ${tab === "submissions" && "bg-secondery"}`}>Submissions</div>}
+            {role === "teacher" && <div onClick={() => setTab("instructions")} className={`p-2 duration-300 hover:light:bg-light-secondery/40 hover:bg-secondery/40 cursor-pointer ${tab === "instructions" && "bg-secondery"}`}>Instructions</div>}
+            {role === "teacher" && <div onClick={() => setTab("submissions")} className={`p-2 duration-300 hover:light:bg-light-secondery/40 hover:bg-secondery/40 cursor-pointer ${tab === "submissions" && "bg-secondery"}`}>Submissions</div>}
           </div>
           {tab === "instructions" && <div className={`px-5 flex flex-col gap-3 overflow-y-scroll ${role === "teacher" ? "h-[calc(100vh-11.9rem)]" : "h-[calc(100vh-13.9rem)]"}`}>
-            {/*<ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>*/}
-            <h4>{selectedWork.instruction}</h4>
+            <ReactMarkdown>{selectedWork.instruction}</ReactMarkdown>
+            {/*<h4>{selectedWork.instruction}</h4>*/}
             {selectedWork.type === "quiz" && selectedWork.quiz?.map((question, qi) => (
               <div>
                 <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-2xl '>
@@ -263,7 +263,7 @@ function Works({ id, role }) {
                   <input value={fileLink} onChange={(e) => setFileLink(e.target.value)} placeholder='paste link here..' className='bg-dark  h-full focus:outline-none px-1 rounded-2xl' />
                 </div>}
                 <div className='flex'>
-                  <div onClick={() => { setShowFileUploader((p) => !p) }} className='gap-2 px-2 flex items-center duration-300 hover:bg-dark/60 cursor-pointer rounded-2xl '>
+                  <div onClick={() => { setShowFileUploader((p) => !p) }} className='gap-2 px-2 flex items-center duration-300 hover:light:bg-light-dark/60 hover:bg-dark/60 cursor-pointer rounded-2xl '>
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-paperclip text-tersiory" viewBox="0 0 16 16">
                       <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0z" />
                     </svg>

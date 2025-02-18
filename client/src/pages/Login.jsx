@@ -1,5 +1,6 @@
 import axios from "axios"
 import { useNavigate, Link, useSearchParams } from "react-router"
+import { toast } from "sonner"
 import Header from "../components/main/Header"
 import { SERVER_URL } from "../config/SERVER_URL"
 import useStore from "../store/store"
@@ -30,15 +31,19 @@ function Login() {
       if (searchParams.get('to') === "join") {
         navigate("/join?name=" + searchParams.get('name') + "&key=" + searchParams.get('key'))
       } else {
-        navigate('/')
+        toast.success(res.data.message)
+        navigate("/")
       }
     })
+      .catch(() => {
+        toast.error("something went wrong!")
+      })
   }
 
   return <>
     <div className="min-h-screen pt-header justify-center text-light bg-dark flex items-center w-100 ">
       <Header />
-      <div className="border border-black bg-secondery w-[50rem] h-[23rem] justify-between items-center flex rounded-2xl">
+      <div className="bg-secondery w-[50rem] h-[23rem] justify-between items-center flex rounded-2xl">
         <div className="w-1/2 gap-3 h-full flex flex-col justify-center items-center">
           <div className="flex flex-col gap-3 text-center">
             <h1 className="text-3xl font-bold ">Login</h1>
@@ -52,7 +57,7 @@ function Login() {
             <div className=" bg-blue-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">Facebook</div>
           </div>
         </div>
-        <div className="h-[90%] opacity-90 border-l border-light/50"></div>
+        <div className="h-[90%] opacity-90 border-l border-tersiory/50"></div>
         <div className="w-1/2 h-ull flex flex-col justify-center gap-3 items-center">
           <form onSubmit=
             {handleSubmit} method="post" className="text-dark w-full h-full flex flex-col justify-center gap-3 items-center">
