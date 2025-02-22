@@ -1,6 +1,9 @@
 import datetime
+import io
+import pandas as pd
+from pika.spec import methods
 from bson import json_util
-from flask import Blueprint, jsonify,request
+from flask import Blueprint, jsonify,request, send_file
 from config.mongodb import classes,users,works,submits
 from middlewares.memeber_required import member_required
 from middlewares.student_required import student_required
@@ -88,7 +91,7 @@ def submit_work(class_id,work_id,userdata):
                             
             print(mark)
             if count > 0:
-                submits.deleteMany({"work_id":ObjectId(work_id),"user_id":ObjectId(userdata['userid'])})
+                submits.delete_many({"work_id":ObjectId(work_id),"user_id":ObjectId(userdata['userid'])})
             submits.insert_one({"work_id":ObjectId(work_id),"class_id":ObjectId(class_id),"user_id":ObjectId(userdata['userid']),"response":data,"marks":marks,"mark":mark,"complete_val":complete_val,"time":time})
             return jsonify({"success":True,"message":"Work submitted!"})
         except Exception as e :
@@ -173,3 +176,113 @@ def change_accept_submits(class_id,work_id,userdata):
     except Exception as e:
         print(e)
         return jsonify({"success":True,"message":"something went wrong","error":str(e)})
+
+
+@work_bp.route('/export-excel/<class_id>',methods=['GET'])
+@teacher_required
+def export_submits(class_id,userdata):
+    pipeline = [
+  { 
+    "$match": { "_id": ObjectId(class_id) } 
+  },
+
+  { 
+    "$lookup": {
+      "from": "users",
+      "localField": "students",
+      "foreignField": "_id",
+      "as": "student_details"
+    }
+  },
+
+  { 
+    "$lookup": {
+      "from": "works",
+      "localField": "_id",
+      "foreignField": "class_id",
+      "as": "works"
+    }
+  },
+
+  { 
+    "$unwind": "$student_details" 
+  },
+
+  { 
+    "$lookup": {
+      "from": "submits",
+      "let": { "student_id": "$student_details._id" },
+      "pipeline": [
+        { 
+          "$match": { 
+            "$expr": { "$eq": ["$user_id", "$$student_id"] } 
+          } 
+        },
+        { 
+          "$project": { "work_id": 1, "mark": 1 } 
+        }
+      ],
+      "as": "submissions"
+    }
+  },
+
+  { 
+    "$project": {
+      "_id": 0,
+      "name": "$student_details.username",
+      "marks": {
+        "$arrayToObject": {
+          "$map": {
+            "input": "$works",
+            "as": "work",
+            "in": [
+              "$$work.title",
+              {
+                "$let": {
+                  "vars": { 
+                    "matchingSubmit": {
+                      "$arrayElemAt": [
+                        {
+                          "$filter": {
+                            "input": "$submissions",
+                            "as": "sub",
+                            "cond": { "$eq": ["$$sub.work_id", "$$work._id"] }
+                          }
+                        },
+                        0
+                      ]
+                    }
+                  },
+                  "in": { "$ifNull": ["$$matchingSubmit.mark", 0] }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+
+  { 
+    "$replaceRoot": { 
+      "newRoot": { "$mergeObjects": ["$$ROOT", "$marks"] } 
+    }
+  },
+
+  { 
+            "$project": {"marks": 0 } }
+]
+
+
+
+    data = list(classes.aggregate(pipeline))# Exclude MongoDB "_id" field
+    print(data)
+    #data = list(submits.find({"class_id":ObjectId(class_id)}, {"_id": 0})) 
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Data')
+    
+    output.seek(0)
+    return send_file(output, download_name="data.xlsx", as_attachment=True, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+

@@ -101,4 +101,5 @@ user prompt :
             print(result)
             return jsonify({"success":True,"response":response.text})  
     except Exception as e:
+        print(e)
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500

@@ -9,33 +9,31 @@ auth_bp = Blueprint('auth',__name__)
 
 @auth_bp.route('/register',methods=["POST"])
 def register():
-    
-    #get data from req
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
-    password = data.get('password')
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
+    sign_with_google = data.get('google',False)
 
-    #check email already exist
     exist_user = users.find_one({"email":email})
     if exist_user:
-        return jsonify({"message":"email already taken","success":False}) , 400
-    
-    #inserting to db
-    registerd_res = users.insert_one({"username": username, "email": email, "password": hashed_password,"student":[],"teacher":[]})
-    userid = str(registerd_res.inserted_id)
+        userid = str(exist_user['_id'])
+        if not sign_with_google:
+            return jsonify({"message":"email already taken","success":False}) , 400
+    else:
+        if sign_with_google:
+            registerd_res = users.insert_one({"username": username, "email": email, "student":[],"teacher":[]})
+        else:
+            password = data.get('password')
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
+            registerd_res = users.insert_one({"username": username, "email": email, "password": hashed_password,"student":[],"teacher":[]})
+        userid = str(registerd_res.inserted_id)
     print(userid)
-    print(registerd_res)
-    #create jwt token
     token = jwt.encode({
         "userid":userid,
         "username":username,
         "email":email,
-        "roles":{},
     },str(os.getenv('JWT_SECRET')),algorithm='HS256')
 
-    #set cookie and response
     res = make_response(jsonify({"message":"user registered successfully : "+username}))
     print(token)
     res.set_cookie('token',token,max_age=360000,secure=True,samesite="None")
@@ -43,33 +41,25 @@ def register():
 
 @auth_bp.route("/login",methods=['POST'])
 def login():
-    #get data from req
     data = request.get_json()
     email = data.get('email')
-    password = data.get('password')
-
+    sign_with_google = data.get('google',False)
+    password = data.get('password','')
     user = users.find_one({"email":email})
     print(user)
     if not user:
         return jsonify({"message":"user not found or password not matching"}) , 401
-    if not bcrypt.checkpw(password.encode('utf-8'),user['password']):
-        return jsonify({"message":"user not found or password not matching"}) , 401
+    if not sign_with_google: 
+        if not bcrypt.checkpw(password.encode('utf-8'),user['password']):
+            return jsonify({"message":"user not found or password not matching"}) , 401
 
     print(user) 
-    roles = {}
-    for class_id in user['teacher']:
-        roles[str(class_id)] = 'teacher'
-    for class_id in user['student']:
-        roles[str(class_id)] = 'student'
-    #create jwt token
     token = jwt.encode({
         "userid":str(user['_id']),
         "username":user['username'],
         "email":user['email'],
-        "roles":roles
     },str(os.getenv("JWT_SECRET")),algorithm='HS256')
 
-    #set cookie and response
     res = make_response(jsonify({"message":"user login successfully : "+user['username'],"username":user['username']}))
     res.set_cookie('token',token,max_age=360000,secure=True,samesite="None")
     return res

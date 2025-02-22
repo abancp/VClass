@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Link } from "react-router"
 import useStore from '../../store/store'
 
-function Header({ sub, handleMenuClick,handleClose,sub1, forWhat }) {
+function Header({ sub, handleMenuClick, handleClose, sub1, forWhat }) {
 
   const isLogin = useStore((state) => state.isLogin)
   const username = useStore((state) => state.username)
@@ -16,17 +16,18 @@ function Header({ sub, handleMenuClick,handleClose,sub1, forWhat }) {
   }, [isLogin, fetchUserdata])
 
   return (
-    <header className=' h-[3.5rem] w-full border-b border-dark top-0 left-0 fixed z-[100] text-light px-4 py-2 justify-between items-center gap bg-secondery gap-3 flex'>
+    <header  className='backdrop-blur-sm  bg-center bg-no-repeat h-[3.5rem] w-full  top-0 left-0 fixed z-[100] text-light  px-4 py-2 justify-between items-center gap bg-secondery/40 gap-3 flex'>
+
       <div className='flex gap-3 '>
         {forWhat === "class" &&
           <svg onClick={handleMenuClick} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className=" cursor-pointer bi bi-list" viewBox="0 0 16 16">
             <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5" />
           </svg>
         }
-        {forWhat ==="popup"&&
+        {forWhat === "popup" &&
           <svg onClick={handleClose} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="hover:rotate-[180deg] duration-300 text-tersiory cursor-pointer bi bi-x-lg" viewBox="0 0 16 16">
-  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-</svg>
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+          </svg>
         }
         <h1 className='text-xl font-bold'><Link to="/" >VClass</Link> {sub && "/"} {sub} {sub1 && "/"} {sub1}</h1>
       </div>

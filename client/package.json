@@ -7,6 +7,7 @@
     "axios": "^1.7.9",
     "backblaze-b2": "^1.7.0",
     "cra-template": "1.2.0",
+    "firebase": "^11.3.1",
     "framer-motion": "^12.4.1",
     "moment": "^2.30.1",
     "moment-timezone": "^0.5.47",

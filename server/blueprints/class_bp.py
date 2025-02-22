@@ -2,14 +2,20 @@ import jwt
 from jwt import algorithms
 from bson.objectid import ObjectId
 from flask import Blueprint, current_app, json, jsonify, make_response, request
-from config.mongodb import classes,users
+from config.mongodb import classes,users,submits
 from middlewares.jwt_protect import jwt_required
 from nanoid import generate
 from bson import json_util
 from middlewares.memeber_required import member_required
 import os
-
+import redis
+from middlewares.teacher_required import teacher_required
 from utils import convert_objectid_to_string
+
+
+
+redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+
 
 class_bp = Blueprint('class',__name__)
 
@@ -27,7 +33,6 @@ def create_class(userdata):
         data['creater'] = ObjectId(userdata['userid'])
         inserted_class = classes.insert_one(data)
         users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"teacher":inserted_class.inserted_id}})
-        userdata['roles'][str(inserted_class.inserted_id)] = "teacher"
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
 
         res =  make_response(jsonify({"success":True,"classid":str(inserted_class.inserted_id),"message":"created class : "+data['name']}))  
@@ -130,7 +135,6 @@ def join_class(userdata):
             return jsonify({"success":False,"message":"users already joined","classid":str(found_class['_id'])}),409
         users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
         classes.update_one({"_id":found_class['_id']},{"$push":{"students":ObjectId(userdata['userid'])},"$inc":{"number_of_students":1}})
-        userdata['roles'][str(found_class['_id'])] = "student"
         print(userdata)
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
         res =  make_response(jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"}))  
@@ -169,10 +173,11 @@ def get_classes(userdata):
         "$project": {
             "_id":0,
             "id":{"$toString":"$class_details._id"},
-            "name": "$class_details.name",  # Include class name
-            "subject": "$class_details.subject",  # Include subject
+            "name": "$class_details.name", 
+            "subject": "$class_details.subject",  
             "description":"$class_details.description",
             "number_of_students":"$class_details.number_of_students",
+            "bg_url":"$class_details.bg_url",
         }
     }
 ]
@@ -185,3 +190,50 @@ def get_classes(userdata):
         print(e)
         return jsonify({"success":False,"message":"Something went wrong"}),500
 
+@class_bp.route('/remove-student',methods=['post'])
+@teacher_required
+def remove_student(userdata):
+    data = request.get_json()
+    classes.update_one({"_id":ObjectId(data['class_id'])},{"$pull":{"students":ObjectId(data['user_id'])},"$inc":{"number_of_students":-1}})
+    users.update_one({"_id":ObjectId(data['user_id'])},{"$pull":{"student":ObjectId(data['class_id'])}})
+    redis_client.delete(f"user_roles:{data['user_id']}_{data['class_id']}")
+    return jsonify({"success":True,"message":"student removed"})
+
+
+@class_bp.route("/student/<class_id>/<user_id>",methods=['GET'])
+@teacher_required
+def get_student_data(class_id,user_id,userdata):
+    print("Hi")
+    try:
+        pipeline = [
+    {
+    "$match": {
+      "class_id": { "$eq": ObjectId(class_id) },
+      "user_id": { "$eq": ObjectId(user_id) }
+    }
+     },
+    {
+    "$lookup": {
+      "from": "works",
+      "localField": "work_id",
+    "foreignField": "_id",
+      "as": "workDetails"
+    }
+  },
+  {
+    "$unwind": "$workDetails"
+  },
+  {
+    "$project": {
+      "_id": 0,
+      "work_title": "$workDetails.title",
+      "mark": "$mark"
+    }
+  }
+]
+        data = submits.aggregate(pipeline)
+        return jsonify({"success":True,"user":json.loads(json_util.dumps(data))})
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+    

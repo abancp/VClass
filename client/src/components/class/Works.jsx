@@ -23,6 +23,7 @@ function Works({ id, role }) {
   const [submits, setSubmits] = useState([])
   const [quiz, setQuiz] = useState({})
   const [totalStudents, setTotalStudents] = useState(0)
+  const [saves, setSaves] = useState([])
 
   useEffect(() => {
     if (workFetch && worksSkip === 0) {
@@ -83,6 +84,24 @@ function Works({ id, role }) {
       .catch(({ response }) => { toast.error("something went wrong!") })
   }
 
+
+  const handleExportExcel = async () => {
+    try {
+      const response = await axios.get(SERVER_URL + "/work/export-excel/" + id, { withCredentials: true, responseType: "blob" })
+      console.log(response)
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "data.xlsx"
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      toast.success("Downloading...")
+    } catch (error) {
+      toast.error("something went wrong! : " + error)
+    }
+  }
+
   const handleChangeAcceptSubmits = (accept) => {
     if (acceptSubmitsSaving) return
     console.log("changed!", accept)
@@ -107,7 +126,10 @@ function Works({ id, role }) {
 
       {(showWorkPopup && role === "teacher" && !showWork) && <CreateWorkPopup id={id} handleClose={() => { setShowWorkPopup(false) }} />}
       {!showWork &&
-        <div onScroll={handleWorksScroll} className={`gap-3 flex flex-col overflow-y-scroll p-3 ${role === "teacher" ? "h-[calc(100vh-9.2rem)]" : "h-[calc(100vh-5rem)]"} w-full`}>
+        <div onScroll={handleWorksScroll} className={`gap-3 flex flex-col overflow-y-scroll p-3 pt-1 ${role === "teacher" ? "h-[calc(100vh-9.2rem)]" : "h-[calc(100vh-5rem)]"} w-full`}>
+          {role === "teacher" && <div className='flex w-full justify-end'>
+            <button onClick={handleExportExcel} className='p-1 px-2 hover:bg-tersiory text-light font-semibold duration-300 bg-tersiory/90 rounded-md' >Export to Excel</button>
+          </div>}
           {
             works.map((work) => (
               <div className='rounded-2xl w-full p-2 border-tersiory/50 bg-secondery/50'>
@@ -240,7 +262,10 @@ function Works({ id, role }) {
                         <tr className='odd:bg-secondery/40 border-b border-tersiory/70'>
                           <td className='py-3 px-6'>{submit.username}</td>
                           <td className='py-3 px-6  flex items-center'><a rel='noreferrer' className={` ${submit.response?.url && "text-blue-500 hover:underline"} `} target="_blank" href={submit.response?.url}>view</a></td>
-                          <td className={`py3   px-6 ${submit.complete_val || " text-tersiory"}`}>{submit.complete_val ? submit.mark : "processing"}</td>
+                          {selectedWork.type === "assignment" &&
+                            <td className={`py3 bg-transparent w-[3rem]   px-6 ${submit.complete_val || " text-tersiory"}`}><input className='bg-transparent w-[3rem]' placeholder={submit.mark} /></td>}
+                          {selectedWork.type === "quiz" &&
+                            <td className={`py3   px-6 ${submit.complete_val || " text-tersiory"}`}>{submit.complete_val ? submit.mark : "processing"}</td>}
                           <td className='py-3 px-6'>{new Date(submit.time).toLocaleString('en-US', {
                             year: 'numeric',
                             month: 'numeric',

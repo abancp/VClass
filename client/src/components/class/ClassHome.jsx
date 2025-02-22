@@ -245,6 +245,7 @@ function ClassHome({ id, classData, role }) {
                 <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
               </svg>
             </div>
+            {anns.length === 0 && <div className='w-full h-full flex justify-center items-center'> <h1 className='font-semibold text-2xl opacity-60 text-center'>No Announcements</h1></div>}
             {
               anns.map((ann) => (
                 <div className=' flex my-2 flex-col gap-1 w-full rounded-2xl bg-secondery/80  p-4'>

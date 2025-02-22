@@ -4,6 +4,7 @@ import { SERVER_URL } from "../config/SERVER_URL"
 import useStore from "../store/store"
 import { toast } from 'sonner'
 import Header from "../components/main/Header"
+import { signInWithGoogle } from "../config/firebase"
 
 function Signup() {
   const state = useStore((state) => state)
@@ -11,35 +12,52 @@ function Signup() {
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    if (e.target.password.value !== e.target.confirm_password.value) {
-      return toast.error("Password not matching")
+    if (!e.google) {
+      e.preventDefault()
     }
-    axios
-      .post(SERVER_URL + "/register", {
+    let userdata = {}
+    if (e.google) {
+      userdata = e
+    } else {
+      if (e.target.password.value !== e.target.confirm_password.value) {
+        return toast.error("Password not matching")
+      }
+      userdata = {
         username: e.target.username.value,
         password: e.target.password.value,
-        email: e.target.email.value
-      }, { withCredentials: true })
+        email: e.target.email.value,
+      }
+    }
+    axios
+      .post(SERVER_URL + "/register", userdata, { withCredentials: true })
       .then((res) => {
         console.log(res.data)
-        state.setUsername(e.target.username.value)
+        if (e.google) {
+          state.setUsername(e.username)
+        } else {
+          state.setUsername(e.target.username.value)
+        }
         state.setIsLogin(true)
         state.fetchUserdata()
         if (searchParams.get('to') === "join") {
           navigate("/join?name=" + searchParams.get('name') + "&key=" + searchParams.get('key'))
         } else {
-          toast.success(res.data.message || "Something went wrong!")  
+          toast.success(res.data.message)
           navigate("/")
         }
       })
-      .catch(()=>{
-        toast.error("Something went wrong!")
+      .catch(({response}) => {
+        toast.error(response.data?.message || "Something went wrong!")
       })
   }
 
+  const handleSignWithGoogle = () => {
+    signInWithGoogle()
+      .then((user) => { handleSubmit({ google: true, email: user.email, username: user.displayName }) })
+  }
+
   return <>
-    <div className="min-h-screen text-light justify-center bg-dark flex items-center w-100 ">
+    <div className="min-h-screen pt-header text-light justify-center bg-dark flex items-center w-100 ">
       <Header />
       <div className=" bg-secondery w-[50rem] h-[23rem] justify-between items-center flex rounded-2xl">
         <div className="w-1/2 gap-3 h-full flex flex-col justify-center items-center">
@@ -50,8 +68,7 @@ function Signup() {
           </div>
           <h2 className="font-semibold text-xl ">or continue with</h2>
           <div className="flex flex-col gap-1 w-full items-center">
-            <div className=" bg-orange-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">google</div>
-            <div className="bg-blue-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">facebook</div>
+            <div onClick={handleSignWithGoogle} className=" bg-orange-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">google</div>
           </div>
         </div>
         <div className="h-[90%] opacity-90 border-l border-tersiory/50"></div>

@@ -3,10 +3,14 @@ import Header from "../components/main/Header"
 import { SERVER_URL } from '../config/SERVER_URL'
 import axios from 'axios'
 import { useNavigate } from 'react-router'
+import SelectBGPopup from '../components/popup/SelectBGPopup'
 
 function CreateClass() {
   const navigate = useNavigate()
   const [descLen, setDescLen] = useState(0)
+  const [showPopup, setShowPopup] = useState(false)
+  const [bgUrl, setBgUrl] = useState("back.png")
+
   const handleCreate = (e) => {
     e.preventDefault()
 
@@ -14,7 +18,8 @@ function CreateClass() {
       {
         name: e.target.name.value,
         subject: e.target.subject.value,
-        description: e.target.description.value
+        description: e.target.description.value,
+        bg_url:bgUrl
       },
       {
         withCredentials: true
@@ -44,6 +49,7 @@ function CreateClass() {
   return (
     <div className="min-h-screen pt-header justify-center text-light bg-dark flex items-center py-10 w-100 ">
       <Header />
+      {showPopup && <SelectBGPopup setSelected={setBgUrl} handleClose={() => setShowPopup(false)} />}
       <div className="border border-black bg-secondery w-[50rem] py-8 min-h-[23rem] justify-between items-center flex rounded-md">
         <div className="w-1/2 gap-3 h-full flex flex-col justify-center items-center">
           <div className="flex flex-col gap-3 text-center">
@@ -54,7 +60,8 @@ function CreateClass() {
               <input name="subject" placeholder="subject" type="text" className="w-[80%] rounded-full h-[2rem] px-3 font-semibold text-lg border border-black" />
               <textarea onChange={(e) => setDescLen(e.target.value?.length)} maxLength="100" name="description" placeholder="description" type="text" className="w-[80%] rounded-2xl max-h-[9rem] h-[2rem] px-3 font-semibold text-lg border border-black" ></textarea>
               <h1 className='text-sm font-[100] text-end text-light'>{descLen}/100</h1>
-              <input type="submit" value="Create Class" className=" text-light w-[80%] hover:text-white hover:bg-tersiory duration-300 rounded-full h-[2rem] px-3 font-semibold cursor-pointer text-lg border border-black" />
+              <img onClick={()=>setShowPopup(true)} alt="cover-photo" src={"/"+bgUrl} className='border cursor-pointer border-tersiory/50 rounded-md w-[15rem] h-[7rem] object-cover' />
+              <input  type="submit" value="Create Class" className=" text-light w-[80%] hover:text-white hover:bg-tersiory duration-300 rounded-full h-[2rem] px-3 font-semibold cursor-pointer text-lg border border-black" />
             </form>
           </div>
         </div>

@@ -2,6 +2,9 @@ import jwt
 from functools import wraps
 from flask import request,jsonify,current_app
 import os
+import redis
+from config.mongodb import users
+from bson import ObjectId
 
 def student_required(f):
     @wraps(f)
@@ -16,11 +19,25 @@ def student_required(f):
             if not token or not class_id:
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
             data = jwt.decode(token,str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
-            print(data)
-            data['role'] = data['roles'][class_id] 
-            if not data['role'] == "student":
-                return jsonify({"success":False,"message":"Auth failed"}) , 401
-
+            redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+            cached_role = redis_client.get(f"user_roles:{data['userid']}_{class_id}")
+            if cached_role:
+                if cached_role != "s":
+                    return jsonify({"success":False,"message":"Auth failed"}) , 401
+                else:
+                    data['role'] = "student"
+            else:
+                user = users.find_one({"_id":ObjectId(data['userid'])})
+                if user:
+                    if ObjectId(class_id) in user.get('student',[]):
+                        redis_client.setex(f"user_roles:{data['userid']}_{class_id}", 600,"s")
+                        data['role'] = "student"
+                    elif ObjectId(class_id) in user.get('teacher',[]):
+                        redis_client.setex(f"user_roles:{data['userid']}_{class_id}",600,"t")
+                        data['role'] = "teacher"
+                    else:
+                        redis_client.setex(f"user_roles:{data['userid']}_{class_id}",600,"n")
+                        return jsonify({"success":False,"message":"Auth failed"}) , 401
         except Exception as e:
             print(e)
             response = jsonify({"success": False, "message": "Something went wrong while Authenticating", "error": str(e)})

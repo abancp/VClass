@@ -51,7 +51,7 @@ function ClassPage() {
         selected === 'works' && <Works role={userRole} id={id} />
       }
       {
-        selected === 'peoples' && <Peoples id={id} />
+        selected === 'peoples' && <Peoples id={id} role={userRole} />
       }
       {
         selected === 'AI_calculator' && <AICalculator />

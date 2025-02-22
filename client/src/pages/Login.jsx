@@ -2,6 +2,7 @@ import axios from "axios"
 import { useNavigate, Link, useSearchParams } from "react-router"
 import { toast } from "sonner"
 import Header from "../components/main/Header"
+import { signInWithGoogle } from "../config/firebase"
 import { SERVER_URL } from "../config/SERVER_URL"
 import useStore from "../store/store"
 
@@ -12,13 +13,19 @@ function Login() {
   const [searchParams] = useSearchParams()
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    if (!e.google) {
+      e.preventDefault()
+    }
+    let userdata = {}
+    if (e.google) {
+      userdata = e
+    } else {
+      userdata.email = e.target.email.value
+      userdata.password = e.target.password.value
+    }
 
     axios.post(SERVER_URL + "/login",
-      {
-        email: e.target.email.value,
-        password: e.target.password.value
-      },
+      userdata,
       {
         withCredentials: true
       }
@@ -35,10 +42,18 @@ function Login() {
         navigate("/")
       }
     })
-      .catch(() => {
-        toast.error("something went wrong!")
+      .catch(({ response }) => {
+        console.log(response)
+        toast.error(response.data?.message || "Something went wrong!")
       })
   }
+
+  const handleSignWithGoogle = () => {
+    signInWithGoogle()
+      .then((user) => { handleSubmit({ google: true, email: user.email }) })
+      .catch(() => { toast.error("Google Authontication failed!") })
+  }
+
 
   return <>
     <div className="min-h-screen pt-header justify-center text-light bg-dark flex items-center w-100 ">
@@ -53,8 +68,7 @@ function Login() {
           </div>
           <h2 className="font-semibold text-xl ">OR Continue with</h2>
           <div className="flex flex-col gap-1 w-full items-center">
-            <div className=" bg-orange-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">Google</div>
-            <div className=" bg-blue-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">Facebook</div>
+            <div onClick={handleSignWithGoogle} className=" bg-orange-600 w-[70%] h-[2rem] rounded-full font-semibold text-lg text-center">Google</div>
           </div>
         </div>
         <div className="h-[90%] opacity-90 border-l border-tersiory/50"></div>

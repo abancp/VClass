@@ -13,8 +13,6 @@ const Canvas = () => {
   const drawText = (text, x, y, color = 'black', fontSize = '20px', fontFamily = 'Arial') => {
     const canvas1 = canvas.current.canvasContainer.children[1]; // Access the second canvas (where drawing occurs)
     const context = canvas1.getContext('2d');
-
-    // Set text properties
     context.font = `${fontSize} ${fontFamily}`;
     context.fillStyle = color;
     context.fillText(text, x, y);
