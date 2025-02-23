@@ -192,14 +192,14 @@ function Works({ id, role }) {
                 <div className='min-w-[56rem] w-[56rem] bg-secondery/70 flex flex-col gap-3 p-3 rounded-2xl '>
                   <div className='flex flex-col px-2 justify-between'>
                     <div className='flex gap-2 justify-between'>
-                      <h1 className='text-lg'>{(qi + 1) + "  " + question.question}</h1>
+                      <h1 className='text-lg'>{qi + 1} {question?.required && "* " + question.question}</h1>
                       <h3>({question.mark})</h3>
                     </div>
 
                     {
                       question.type === "MCQ" && question.options?.map((option, oi) => (
                         <div className=' flex  gap-2'>
-                          <input onChange={(e) => { setQuiz((p) => ({ ...p, [qi]: e.target.value })) }} name={qi} value={option} type="radio" id={qi + "-" + oi} />
+                          <input required={question?.required} onChange={(e) => { setQuiz((p) => ({ ...p, [qi]: e.target.value })) }} name={qi} value={option} type="radio" id={qi + "-" + oi} />
                           <label className='cursor-pointer' for={qi + "-" + oi}>{option}</label>
                         </div>
                       ))

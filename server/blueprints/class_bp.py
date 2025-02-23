@@ -1,8 +1,9 @@
 import jwt
 from jwt import algorithms
+from pika.spec import methods
 from bson.objectid import ObjectId
 from flask import Blueprint, current_app, json, jsonify, make_response, request
-from config.mongodb import classes,users,submits
+from config.mongodb import classes,users,submits,works,anns,srcs,events
 from middlewares.jwt_protect import jwt_required
 from nanoid import generate
 from bson import json_util
@@ -236,4 +237,18 @@ def get_student_data(class_id,user_id,userdata):
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
-    
+
+@class_bp.route("/delete/<class_id>",methods=['DELETE'])
+@teacher_required
+def delete_class(class_id,userdata):
+    try:
+        classes.delete_many({"_id":ObjectId(class_id)})
+        submits.delete_many({"class_id":ObjectId(class_id)})
+        works.delete_many({"class_id":ObjectId(class_id)})
+        anns.delete_many({"class_id":ObjectId(class_id)})
+        srcs.delete_many({"class_id":ObjectId(class_id)})
+        events.delete_many({"class_id":ObjectId(class_id)})
+        return jsonify({"success":True,"message":"Class delted!"})
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500

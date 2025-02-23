@@ -7,10 +7,12 @@ import axios from 'axios';
 import { SERVER_URL } from '../config/SERVER_URL';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import GenerateQuizPopup from '../components/popup/GenerateQuizPopup';
 
 function AddWork() {
   const { type, id } = useParams()
   const navigate = useNavigate()
+
 
   const [dueDate, setDueDate] = useState(new Date())
   const [totalMark, setTotalMark] = useState(1)
@@ -28,7 +30,7 @@ function AddWork() {
   const [students, setStudents] = useState([])
   const [selectedStudents, setSelectedStudents] = useState(['*'])
   const [showSelectStudentPopup, setShowSelectStudentPopup] = useState(false)
-
+  const [showGenerateQuizPopup, setShowGenerateQuizPopup] = useState(false)
 
   useEffect(() => {
     axios.get(SERVER_URL + "/class/peoples/" + id, { withCredentials: true })
@@ -117,6 +119,7 @@ function AddWork() {
     }
   }
 
+
   if (!(type.toLowerCase() === "assignment" || type.toLowerCase() === "quiz")) {
     return (
       <div className=''>Page Not Found</div>
@@ -126,6 +129,7 @@ function AddWork() {
   return (
     <div className='w-full text-light  h-full bg-dark pt-header min-h-screen'>
       <Header handleClose={() => { navigate("/class/" + id + "?tab=works") }} forWhat="popup" sub="Add Assignment" />
+      {showGenerateQuizPopup && <GenerateQuizPopup setQuiz={(q) => setQuiz(q)} id={id} handleClose={() => setShowGenerateQuizPopup(false)} />}
       <form onSubmit={handleAssign} className='h-full p-3 flex gap-3'>
         <div className='flex flex-col gap-3'>
           <div className='min-w-[56rem] w-[56rem] bg-secondery flex flex-col gap-3 p-3 rounded-md border border-tersiory/50'>
@@ -138,8 +142,8 @@ function AddWork() {
               <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *<i className='font-normal'>italic</i>* _<b>strong</b>_ </span></h1>
               <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-[9rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
             </div>
-            <div onClick="" className='w-full flex justify-end'>
-            <button className='bg-tersiory p-1 rounded-md w-fit px-2 text-dark'>Generate Quiz</button>
+            <div className='w-full flex justify-end'>
+              <button type='button' onClick={() => { setShowGenerateQuizPopup(true) }} className='bg-tersiory p-1 rounded-md w-fit px-2 text-dark'>Generate Quiz</button>
             </div>
           </div>
           {type.toLowerCase() === "quiz" &&
@@ -196,7 +200,7 @@ function AddWork() {
                     q.type === "MCQ" && q.options.map((option, optionI) => (
                       <div className='flex '>
                         <input
-                          defaultChecked={optionI === 0 ? true : false}
+                          defaultChecked={optionI === q.options.indexOf(q.answer) ? true : false}
                           onChange={(e) => {
                             setQuiz((p) =>
                               p.map((q0, i1) =>
@@ -206,7 +210,9 @@ function AddWork() {
                               ))
                           }
                           }
-                          type="radio" name={i + "ANS"} />
+                          type="radio" name={i + "ANS"}
+
+                        />
                         <input
                           placeholder={"Option " + (optionI + 1)}
                           className=' border-secondery duration-300 outline-none focus:border-b-2 focus:outline-none focus:border-tersiory hover:border-tersiory/30 border-b bg-transparent w-full p-1'

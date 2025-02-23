@@ -12,6 +12,7 @@ import Sidebar from '../components/main/Sidebar'
 import { SERVER_URL } from '../config/SERVER_URL'
 import MyCalendar from '../components/class/Calender'
 import Footer from '../components/main/Footer'
+import Settings from '../components/class/Settings'
 //TODO : Navigate sidebar tabes throgh urls 
 function ClassPage() {
   const [chats, setChats] = useState([])
@@ -58,6 +59,9 @@ function ClassPage() {
       }
       {
         selected === 'calender' && <MyCalendar id={id} />
+      }
+      {
+        selected === 'settings' && <Settings id={id} />
       }
       {
         selected === "vclass_ai" && <AIChat chats={chats} setChats={setChats} id={id} />

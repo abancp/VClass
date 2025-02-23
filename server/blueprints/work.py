@@ -11,6 +11,8 @@ from middlewares.teacher_required import teacher_required
 import json
 from bson.objectid import ObjectId
 from config.rabbitmq import channel
+from config.genai import model
+import PyPDF2
 
 work_bp = Blueprint('work',__name__)
 
@@ -64,20 +66,29 @@ def submit_work(class_id,work_id,userdata):
                 for question_index,question in enumerate(work['quiz']):
                     print(data)
                     print(question_index,question)
+                    print(marks)
                     if 'answer' in question and str(question_index) in data:
                         if question['type'] == "MCQ":
                             if data[str(question_index)] == question['answer']:
                                 marks[str(question_index)] = question['mark']
                                 mark+=question['mark']
+                            else:
+                                marks[str(question_index)] = 0 
                         elif question['type'] == "SHORT":
                             if 'case_sensitive' in question and question['case_sensitive']:
                                 if data[str(question_index)] == question['answer']:
                                     marks[str(question_index)] = question['mark']
                                     mark+=question['mark']
+                                else:
+                                    marks[str(question_index)] = question['mark']
+                                    
                             else:
                                 if data[str(question_index)].lower() == question['answer'].lower():
                                     marks[str(question_index)] = question['mark']
                                     mark+=question['mark']
+                                else:
+                                    marks[str(question_index)] = question['mark']
+ 
 
                                 
                         elif question['type'] == "DESCRIPTIVE":
@@ -285,4 +296,59 @@ def export_submits(class_id,userdata):
     
     output.seek(0)
     return send_file(output, download_name="data.xlsx", as_attachment=True, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+@work_bp.route("/generate/<class_id>",methods=['POST'])
+@teacher_required
+def generate_work(class_id,userdata):
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error":"file not found!"}),400
+        pdf_file = request.files['file']
+        if pdf_file.filename == '':
+            return jsonify({'error':'file not found!'}),400
+        text = ""
+        reader = PyPDF2.PdfReader(pdf_file)
+        mcq = request.form.get("MCQ")
+        short= request.form.get("SHORT")
+        desc = request.form.get("DESCRIPTIVE")
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+        system_prompt = f"""you need generate JSON formated array of dicts with double quated keys like [{{
+    'question': '',
+    'type': 'MCQ',
+    'options': [
+      '',
+      ''
+    ],
+    'answer': '',
+    'mark': int,
+    'required': boolean,
+  }},{{
+    'question': '',
+    'type': 'SHORT',
+    'answer': '',
+    'case_sensitive':false,
+    'mark': int,
+    'required': boolean,
+  }},{{
+    'question': '',
+    'type': 'DESCRIPTIVE',
+    'answer': '',
+    'mark': int,
+    'required': boolean,
+  }}]
+
+    for {mcq} MCQs and {short} SHORTs and {desc} DESCRIPTIVE type questions . Give only the array , not need the explanation .  from the given \n resource :  """
+        response = model.generate_content(system_prompt + text)
+        quiz = response.text
+        if response.text.startswith("```python"):
+            quiz = response.text.strip().removeprefix('```python').removesuffix("```")
+        if response.text.startswith("```json"):
+            quiz = response.text.strip().removeprefix('```json').removesuffix("```")
+
+        print(quiz)
+        return jsonify({"success":True,"quiz":quiz.strip()})  
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
 
