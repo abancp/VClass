@@ -82,6 +82,7 @@ function AddWork() {
           ).then(({ data }) => {
             if (data.success) {
               toast.success("Task assigned")
+              navigate("/class/" + id + "?tab=works")
             }
           })
           break
@@ -103,6 +104,7 @@ function AddWork() {
         ).then(({ data }) => {
           if (data.success) {
             toast.success("Task assigned")
+            navigate("/class/" + id + "?tab=works")
           }
         })
 
@@ -136,12 +138,14 @@ function AddWork() {
               <h1 className='ml-2 font-bold'>Instructions <span className='opacity-70'>   |  *<i className='font-normal'>italic</i>* _<b>strong</b>_ </span></h1>
               <textarea name='instructions' placeholder='Instructions (optional)' className='w-full h-[9rem] bg-transparent/50 border rounded-md p-2 focus:outline-none border-tersiory/50' ></textarea>
             </div>
+            <div onClick="" className='w-full flex justify-end'>
+            <button className='bg-tersiory p-1 rounded-md w-fit px-2 text-dark'>Generate Quiz</button>
+            </div>
           </div>
           {type.toLowerCase() === "quiz" &&
             <div className='w-full h-[1rem] flex group justify-center items-center mt-4 duration-300 rounded-md cursor-pointer hover:border-dotted border border-transparent hover:border-tersiory'>
               <div onClick={() => {
                 setQuiz((p) => [{ question: '', type: 'MCQ', options: ['', ''], required: true }, ...p])
-
               }}
                 className=' px-2 bg-tersiory hidden duration-300 group-hover:block h-[1.5rem] rounded-md'>add question</div>
             </div>

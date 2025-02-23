@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Link } from "react-router"
 import useStore from '../../store/store'
+import UserProfilePopup from '../popup/UserProfilePopup'
 
 function Header({ sub, handleMenuClick, handleClose, sub1, forWhat }) {
+
+  const [showUserPopup, setShowUserPopup] = useState(false)
 
   const isLogin = useStore((state) => state.isLogin)
   const username = useStore((state) => state.username)
@@ -16,8 +19,8 @@ function Header({ sub, handleMenuClick, handleClose, sub1, forWhat }) {
   }, [isLogin, fetchUserdata])
 
   return (
-    <header  className='backdrop-blur-sm  bg-center bg-no-repeat h-[3.5rem] w-full  top-0 left-0 fixed z-[100] text-light  px-4 py-2 justify-between items-center gap bg-secondery/40 gap-3 flex'>
-
+    <header className='backdrop-blur-sm  bg-center bg-no-repeat h-[3.5rem] w-full  top-0 left-0 fixed z-[100] text-light  px-4 py-2 justify-between items-center gap bg-secondery/40 gap-3 flex'>
+      {showUserPopup && <UserProfilePopup handleClose={()=>setShowUserPopup(false)} username={username}  />}
       <div className='flex gap-3 '>
         {forWhat === "class" &&
           <svg onClick={handleMenuClick} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className=" cursor-pointer bi bi-list" viewBox="0 0 16 16">
@@ -40,7 +43,7 @@ function Header({ sub, handleMenuClick, handleClose, sub1, forWhat }) {
         </Link>}
         {
           isLogin ?
-            <h1 className='text-xl font-bold'>{username}</h1>
+            <h1 onClick={() => { setShowUserPopup(true) }} className='text-xl cursor-pointer hover:text-tersiory duration-300 font-bold'>{username}</h1>
             :
             <div className='flex gap-3'>
               <Link className='px-2 py-1 text-md hover:text-white duration-300' to="/login">Login</Link>
