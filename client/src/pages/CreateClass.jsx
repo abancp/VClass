@@ -4,12 +4,14 @@ import { SERVER_URL } from '../config/SERVER_URL'
 import axios from 'axios'
 import { useNavigate } from 'react-router'
 import SelectBGPopup from '../components/popup/SelectBGPopup'
+import Switch from "react-switch"
 
 function CreateClass() {
   const navigate = useNavigate()
   const [descLen, setDescLen] = useState(0)
   const [showPopup, setShowPopup] = useState(false)
   const [bgUrl, setBgUrl] = useState("back.png")
+  const [publicClass, setPublicClass] = useState(false)
 
   const handleCreate = (e) => {
     e.preventDefault()
@@ -19,7 +21,8 @@ function CreateClass() {
         name: e.target.name.value,
         subject: e.target.subject.value,
         description: e.target.description.value,
-        bg_url:bgUrl
+        public:publicClass,
+        bg_url: bgUrl
       },
       {
         withCredentials: true
@@ -60,8 +63,12 @@ function CreateClass() {
               <input name="subject" placeholder="subject" type="text" className="w-[80%] rounded-full h-[2rem] px-3 font-semibold text-lg border border-black" />
               <textarea onChange={(e) => setDescLen(e.target.value?.length)} maxLength="100" name="description" placeholder="description" type="text" className="w-[80%] rounded-2xl max-h-[9rem] h-[2rem] px-3 font-semibold text-lg border border-black" ></textarea>
               <h1 className='text-sm font-[100] text-end text-light'>{descLen}/100</h1>
-              <img onClick={()=>setShowPopup(true)} alt="cover-photo" src={"/"+bgUrl} className='border cursor-pointer border-tersiory/50 rounded-md w-[15rem] h-[7rem] object-cover' />
-              <input  type="submit" value="Create Class" className=" text-light w-[80%] hover:text-white hover:bg-tersiory duration-300 rounded-full h-[2rem] px-3 font-semibold cursor-pointer text-lg border border-black" />
+              <div className='flex items-center gap-3'>
+                <h4 className='text-light'>public class</h4>
+                <Switch checked={publicClass} height={20} width={48} onChange={(p) => setPublicClass(p)} />
+              </div>
+              <img onClick={() => setShowPopup(true)} alt="cover-photo" src={"/" + bgUrl} className='border cursor-pointer border-tersiory/50 rounded-md w-[15rem] h-[7rem] object-cover' />
+              <input type="submit" value="Create Class" className=" text-light w-[80%] hover:text-white hover:bg-tersiory duration-300 rounded-full h-[2rem] px-3 font-semibold cursor-pointer text-lg border border-black" />
             </form>
           </div>
         </div>

@@ -132,7 +132,7 @@ function Works({ id, role }) {
           </div>}
           {
             works.map((work) => (
-              <div className='rounded-2xl w-full p-2 border-tersiory/50 bg-secondery/50'>
+              <div className='rounded-2xl w-full p-2 bg-secondery/50'>
                 <h1 onClick={() => { setShowWork(true); setSelectedWork(work); setAcceptSubmits(work.accept_submits) }} className='font-semibold text-lg cursor-pointer hover:text-tersiory w-fit'>{work.title}</h1>
                 <div className='flex gap-3 mt-1  text-tersiory/90 '>
                   <h6 className='font-light text-[14px]'>{work.teacher_name}</h6>

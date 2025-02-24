@@ -1,10 +1,26 @@
-import React from 'react'
+import axios from 'axios'
+import React, { useEffect } from 'react'
 import { Link } from "react-router"
+import { toast } from 'sonner'
+import { SERVER_URL } from '../../config/SERVER_URL'
 
-function ClassCard({ forHome, name, subject, description, id, number_of_students, bg_url }) {
+function ClassCard({ publicClasses, forHome, name, subject, description, id, number_of_students, bg_url }) {
+  useEffect(() => { console.log(publicClasses) }, [])
+  const handleClick = () => {
+    if (!publicClasses) return
+    axios.post(SERVER_URL + "/class/public/join", { _id: id }, { withCredentials: true })
+      .then(({ data }) => {
+        if (data.success) {
+          toast.success("Joined to class")
+          window.location.reload()
+        }
+      })
+      .catch(() => toast.error("Something went wrong!"))
+
+  }
   return (
-    <div className='cursor-pointer relative rounded-md w-[23rem] h-[10rem]'>
-      <Link to={forHome ? "/" : "/class/" + id}>
+    <div onClick={handleClick} className='cursor-pointer relative rounded-md w-[23rem] h-[10rem]'>
+      <Link to={forHome || publicClasses ? "/" : "/class/" + id}>
 
         <img alt='' src={"/" + bg_url} className="cursor-pointer object-cover rounded-md h-full w-full" />
         <div class="group text-light p-5 pt-2 flex flex-col  items-start ease-in-out justify-start absolute inset-0 transition-all duration-300 rounded-md bg-gradient-to-r to-transparent from-secondery bg-size-200 hover:backdrop-blur-sm hover:bg-opacity-70 hover:bg-secondery hover:bg-pos-0 bg-pos-100">

@@ -30,7 +30,7 @@ function Peoples({ id, role }) {
         if (data.success) {
           toast.success("User removed!")
           setPeoples((prev) => ({
-            ...prev, 
+            ...prev,
             students: prev.students.filter((v) => String(v._id) !== String(user_id))
           }));
         } else {
@@ -67,7 +67,7 @@ function Peoples({ id, role }) {
       <h1 className='text-x py-2 rounded-md border border-tersiory px-4 font-bold'>Teachers</h1>
       {
         peoples?.teachers?.map((teacher) => (
-          <div className='py-2 w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{teacher.username}</div>
+          <div className='py-2 r w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{teacher.username}</div>
         ))
       }
       <h1 className='text-x  py-2 rounded-md border border-tersiory px-4 font-bold'>Students</h1>

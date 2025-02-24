@@ -1,5 +1,6 @@
 import jwt
 from jwt import algorithms
+from pandas.core.methods.describe import describe_categorical_1d
 from pika.spec import methods
 from bson.objectid import ObjectId
 from flask import Blueprint, current_app, json, jsonify, make_response, request
@@ -145,6 +146,30 @@ def join_class(userdata):
         print(e)
         return jsonify({"success":False,"message":"Something went wrong!"}),500
 
+@class_bp.route("/public/join",methods=['POST'])
+@jwt_required
+def join_public_class(userdata):
+    try:
+        data = request.get_json()
+        data['_id'] = ObjectId(data['_id'])
+        print(data)
+        userObjectId = ObjectId(userdata['userid'])
+        found_class = classes.find_one(data)
+        if not found_class:
+            return jsonify({"success":False,"message":"class not found"}),404
+        user = users.find_one({"_id":userObjectId},{"student":1,"teacher":1})
+        print(user,found_class['_id'])
+        if found_class['_id'] in user['teacher'] or found_class['_id'] in user['student']:
+            return jsonify({"success":False,"message":"users already joined","classid":str(found_class['_id'])}),409
+        users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
+        classes.update_one({"_id":found_class['_id']},{"$push":{"students":ObjectId(userdata['userid'])},"$inc":{"number_of_students":1}})
+        print(userdata)
+        res =  make_response(jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"}))  
+        return res,200
+    except Exception as e :
+        print(e)
+        return jsonify({"success":False,"message":"Something went wrong!"}),500
+
 @class_bp.route("/classes",methods=['GET'])
 @jwt_required
 def get_classes(userdata):
@@ -176,6 +201,7 @@ def get_classes(userdata):
             "id":{"$toString":"$class_details._id"},
             "name": "$class_details.name", 
             "subject": "$class_details.subject",  
+            "public":"$class_details.public",
             "description":"$class_details.description",
             "number_of_students":"$class_details.number_of_students",
             "bg_url":"$class_details.bg_url",
@@ -190,6 +216,36 @@ def get_classes(userdata):
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"Something went wrong"}),500
+
+
+@class_bp.route("/public/classes",methods=['GET'])
+@jwt_required
+def get_public_classes(userdata):
+    try:
+
+        pipeline_public = [
+    {
+        "$match": {"public": True}  # Match only public classes
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "id": {"$toString": "$_id"},
+            "name": "$name",
+            "subject": "$subject",
+            "description": "$description",
+            "number_of_students": "$number_of_students",
+            "bg_url": "$bg_url",
+        }
+    }
+]
+        class_details = classes.aggregate(pipeline_public)
+        return jsonify({"a":1,"success":True,"classes":json_util.loads(json_util.dumps(list(class_details)))})
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"Something went wrong"}),500
+
+
 
 @class_bp.route('/remove-student',methods=['post'])
 @teacher_required

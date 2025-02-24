@@ -27,9 +27,9 @@ function Settings({ id, role }) {
 
   return (
     <div className='w-full h-full pl-[4rem] p-[2rem]'>
-      <div className='rounded-2xl bg-red-500/5 p-2 flex flex-col gap-3 mt-[2rem]'>
+      <div className='rounded-2xl bg-red-500/5 p-2 flex border border-red-500/20 flex-col gap-3 mt-[2rem]'>
         <h1 className='text-2xl text-red-500 font-bold '>Danger Zone</h1>
-        <div className='w-full h-0 border-t border-tersiory'></div>
+        <div className='w-full h-0 border-t border-tersiory/30'></div>
         <div className='flex justify-between w-full'>
           <h4>Delete this Class permenently : </h4>
           <button onClick={deleteClass} className='px-2 py-1 rounded-md bg-red-600'>Delete Class</button>
