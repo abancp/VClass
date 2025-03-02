@@ -7,11 +7,13 @@ const useStore = create((set) => ({
   setIsLogin: (isLogin) => set({ isLogin }),
   username: null,
   setUsername: (username) => set({ username }),
+  profileUrl: null,
+  setProfileUrl: (profileUrl) => set({ profileUrl }),
   fetchUserdata: () => {
     axios.get(SERVER_URL + "/get-userdata", { withCredentials: true }).then(({ data }) => {
       console.log(data)
       if (data.success) {
-        set({ username: data.username, isLogin: true })
+        set({ username: data.username, isLogin: true, profileUrl: data.profile_url })
       }
     })
   }

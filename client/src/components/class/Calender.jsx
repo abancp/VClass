@@ -22,7 +22,7 @@ const VClassCalendar = ({ id }) => {
       .then(({ data }) => {
         if (data.success) {
           console.log(data)
-          for(const e of data.events){
+          for (const e of data.events) {
             e.start = new Date(e.start)
             e.end = new Date(e.end)
           }

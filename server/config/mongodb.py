@@ -15,3 +15,9 @@ anns= db['anns']
 submits = db['submits']
 srcs = db['srcs']
 events = db['events']
+
+DOUBT_LIKES_COLLECTION = 'doubt_likes'
+USERS_COLLECTION = 'users'
+DOUBTS_COLLECTION = 'doubts'
+DOUBT_COMMENTS_COLLECTION = 'doubt_comments'
+COMMENT_LIKES_COLLECTION = 'comment_likes'

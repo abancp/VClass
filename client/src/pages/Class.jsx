@@ -13,6 +13,9 @@ import { SERVER_URL } from '../config/SERVER_URL'
 import MyCalendar from '../components/class/Calender'
 import Footer from '../components/main/Footer'
 import Settings from '../components/class/Settings'
+import { transpose } from 'date-fns'
+import ManageInfoPopup from '../components/popup/ManageInfoPopup'
+import Doubts from '../components/class/Doubts'
 //TODO : Navigate sidebar tabes throgh urls 
 function ClassPage() {
   const [chats, setChats] = useState([])
@@ -22,6 +25,7 @@ function ClassPage() {
   const [showSidebar, setShowSidebar] = useState(false)
   const [userRole, setUserRole] = useState('student')
   const [selected, setSelected] = useState(searchParams.get('tab') ? searchParams.get('tab') : 'class')
+  const [showInfo, setShowInfo] = useState(false)
 
   useEffect(() => {
     axios.get(SERVER_URL + "/class/" + id, { withCredentials: true })
@@ -29,6 +33,12 @@ function ClassPage() {
         console.log(data)
         setClassData(data.class)
         setUserRole(data.role)
+      })
+      .catch(({ response }) => {
+        console.log(response)
+        if (response.status === 401) {
+          setShowInfo(true)
+        }
       })
   }, [id])
 
@@ -44,9 +54,13 @@ function ClassPage() {
       />
 
       <Sidebar selected={selected} handleChange={(type) => setSelected(type)} full={showSidebar} forWhat={"class"} classname={classData.name} />
+      {showInfo && <ManageInfoPopup id={id} visiter handleClose={() => setShowInfo(false)} />}
 
       {
         selected === "class" && <ClassHome role={userRole} classData={classData} id={id} />
+      }
+      {
+        selected === 'doubts' && <Doubts role={userRole} id={id} />
       }
       {
         selected === 'works' && <Works role={userRole} id={id} />

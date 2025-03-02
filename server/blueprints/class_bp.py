@@ -4,7 +4,7 @@ from pandas.core.methods.describe import describe_categorical_1d
 from pika.spec import methods
 from bson.objectid import ObjectId
 from flask import Blueprint, current_app, json, jsonify, make_response, request
-from config.mongodb import classes,users,submits,works,anns,srcs,events
+from config.mongodb import classes,users,submits,works,anns,srcs,events,db
 from middlewares.jwt_protect import jwt_required
 from nanoid import generate
 from bson import json_util
@@ -36,7 +36,6 @@ def create_class(userdata):
         inserted_class = classes.insert_one(data)
         users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"teacher":inserted_class.inserted_id}})
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
-
         res =  make_response(jsonify({"success":True,"classid":str(inserted_class.inserted_id),"message":"created class : "+data['name']}))  
         res.set_cookie('token',token,max_age=360000)
         return res
@@ -141,6 +140,7 @@ def join_class(userdata):
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
         res =  make_response(jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"}))  
         res.set_cookie('token',token,max_age=360000)
+        redis_client.delete(f"user_roles:{data['user_id']}_{data['class_id']}")
         return res,200
     except Exception as e :
         print(e)
@@ -163,7 +163,7 @@ def join_public_class(userdata):
             return jsonify({"success":False,"message":"users already joined","classid":str(found_class['_id'])}),409
         users.update_one({"_id":userObjectId},{"$push":{"student":found_class['_id']}})
         classes.update_one({"_id":found_class['_id']},{"$push":{"students":ObjectId(userdata['userid'])},"$inc":{"number_of_students":1}})
-        print(userdata)
+        redis_client.delete(f"user_roles:{userdata['userid']}_{str(data['_id'])}")
         res =  make_response(jsonify({"success":True,"classid":str(found_class['_id']),"message":"Joined to class"}))  
         return res,200
     except Exception as e :
@@ -228,6 +228,17 @@ def get_public_classes(userdata):
         "$match": {"public": True}  # Match only public classes
     },
     {
+        "$lookup": {
+            "from": "users",
+            "localField": "creater",
+            "foreignField": "_id",
+            "as": "creater_details"
+        }
+    },
+    {
+        "$unwind": "$creater_details"  # Unwind class_details array
+    },
+    {
         "$project": {
             "_id": 0,
             "id": {"$toString": "$_id"},
@@ -236,6 +247,8 @@ def get_public_classes(userdata):
             "description": "$description",
             "number_of_students": "$number_of_students",
             "bg_url": "$bg_url",
+            "creater":"$creater_details.username",
+            "creater_profile_url":"$creater_details.profile_url"
         }
     }
 ]
@@ -260,7 +273,6 @@ def remove_student(userdata):
 @class_bp.route("/student/<class_id>/<user_id>",methods=['GET'])
 @teacher_required
 def get_student_data(class_id,user_id,userdata):
-    print("Hi")
     try:
         pipeline = [
     {
@@ -308,3 +320,63 @@ def delete_class(class_id,userdata):
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+
+
+@class_bp.route("/make/teacher",methods=['POST'])
+@teacher_required
+def make_teacher(userdata):
+    try:
+        data = request.get_json()
+        classes.update_one({"_id":ObjectId(data['class_id'])},{"$pull":{"students":ObjectId(data['user_id'])},"$push":{"teachers":ObjectId(data['user_id'])}})
+        users.update_one({"_id":ObjectId(data['user_id'])},{"$pull":{"student":ObjectId(data['class_id'])},"$push":{"teacher":ObjectId(data['class_id'])}})
+        redis_client.delete(f"user_roles:{data['user_id']}_{data['class_id']}")
+        return jsonify({"success":True,"message":"Teacher added"})
+    except Exception as e:
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+        
+@class_bp.route("/remove/teacher",methods=['POST'])
+@teacher_required
+def remove_teacher(userdata):
+    try:
+        data = request.get_json()
+        if userdata['userid'] == data['user_id']:
+            return jsonify({"success":False,"message":"Yourself can't remove from teacher"})
+        classes.update_one({"_id":ObjectId(data['class_id'])},{"$push":{"students":ObjectId(data['user_id'])},"$pull":{"teachers":ObjectId(data['user_id'])}})
+        users.update_one({"_id":ObjectId(data['user_id'])},{"$push":{"student":ObjectId(data['class_id'])},"$pull":{"teacher":ObjectId(data['class_id'])}})
+        redis_client.delete(f"user_roles:{data['user_id']}_{data['class_id']}")
+        return jsonify({"success":True,"message":"Teacher added"})
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+
+@class_bp.route("/info/<class_id>",methods=['POST','GET'])
+def create_or_get_info(class_id):
+    if request.method == "POST":
+        return create_info(class_id)
+    elif request.method == "GET":
+        return get_info(class_id)
+    else:       
+        return jsonify({"success":False,"error":"Method not Allowed!"}),405
+
+@teacher_required
+def create_info(class_id,userdata):
+    try:
+        data = request.get_json()
+        db['infos'].replace_one({"class_id":ObjectId(class_id)},{"class_id":ObjectId(class_id),"info":data['info']},upsert=True)
+        return jsonify({"success":True,"message":"Created Info"})
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+
+@jwt_required
+def get_info(class_id,userdata):
+    try:
+        info_doc = db['infos'].find_one({"class_id":ObjectId(class_id)},{"info":1})
+        if not info_doc:
+            return jsonify({"success":True,"message":"No info found","info":""})
+        return jsonify({"success":True,"info":info_doc['info']}) 
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+
+

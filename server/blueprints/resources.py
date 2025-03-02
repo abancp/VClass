@@ -21,13 +21,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 src_bp = Blueprint('src',__name__)
-
-info = InMemoryAccountInfo()
-b2_api = B2Api(info)
-auth_time = time.time()
-b2_api.authorize_account("production",os.getenv("B2_APP_KEY_ID"),os.getenv("B2_APP_KEY"))
-print(b2_api.account_info.get_allowed())
-bucket = b2_api.get_bucket_by_name(os.getenv("B2_BUCKET_NAME"))
+try:
+    info = InMemoryAccountInfo()
+    b2_api = B2Api(info)
+    auth_time = time.time()
+    b2_api.authorize_account("production",os.getenv("B2_APP_KEY_ID"),os.getenv("B2_APP_KEY"))
+    print(b2_api.account_info.get_allowed())
+    bucket = b2_api.get_bucket_by_name(os.getenv("B2_BUCKET_NAME"))
+except Exception as e:
+    print("Error while auth b2",e)
 
 def get_file_extension(content_type):
     extension = mimetypes.guess_extension(content_type)

@@ -46,6 +46,8 @@ consider 3 : all times are stored in unix milliseconds
 
 consider 4 : a work's due_date is the last date of accepting submits
 
+make all keys double quated
+
 user role in this class is {userdata['role']} 
 
 if user prompt is not about data from database just response <general>

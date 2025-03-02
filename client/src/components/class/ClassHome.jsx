@@ -23,12 +23,17 @@ function ClassHome({ id, classData, role }) {
   const [downloadUrl, setDownloadUrl] = useState()
 
   useEffect(() => {
-    axios.get(SERVER_URL + "/ann/anns/" + id + "?skip=" + annSkip, { withCredentials: true }).then(({ data }) => {
-      if (data.success) {
-        console.log("Fecthed anns")
-        setAnns((p) => [...p, ...data.anns])
-      }
-    })
+    axios.get(SERVER_URL + "/ann/anns/" + id + "?skip=" + annSkip, { withCredentials: true })
+      .then(({ data }) => {
+        if (data.success) {
+          console.log("Fecthed anns")
+          setAnns((p) => [...p, ...data.anns])
+        }
+      })
+      .catch(({ response }) => {
+        if (response.status === 401) return
+        toast.error(response?.data?.message || "something went wrong!")
+      })
   }, [annSkip, id])
 
   useEffect(() => {
@@ -40,6 +45,10 @@ function ClassHome({ id, classData, role }) {
         setDownloadUrl(data.download_url)
       }
     })
+      .catch(({ response }) => {
+        if (response.status === 401) return
+        toast.error(response?.data?.message || "something went wrong!")
+      })
   }, [selectedSrcIndex, srcs, id])
 
   useEffect(() => {
@@ -51,6 +60,10 @@ function ClassHome({ id, classData, role }) {
         console.log(data)
       }
     })
+      .catch(({ response }) => {
+        if (response.status === 401) return
+        toast.error(response?.data?.message || "something went wrong!")
+      })
   }, [id, srcsRefresh])
 
   const handleAnnsScroll = (e) => {
@@ -73,6 +86,9 @@ function ClassHome({ id, classData, role }) {
           console.log("Announced")
         }
       })
+      .catch(({ response }) => {
+        toast.error(response?.data?.message || "something went wrong!")
+      })
   }
 
 
@@ -88,6 +104,9 @@ function ClassHome({ id, classData, role }) {
         setAnns(data.anns)
       }
     })
+      .catch(({ response }) => {
+        toast.error(response?.data?.message || "something went wrong!")
+      })
   }
 
 

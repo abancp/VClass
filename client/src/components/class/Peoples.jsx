@@ -8,6 +8,7 @@ import StudentPopup from '../popup/StudentPopup'
 function Peoples({ id, role }) {
   const [peoples, setPeoples] = useState({ students: [], teachers: [] })
   const [selIndex, setSelIndex] = useState(-1)
+  const [selTeacherIndex, setSelTeacherIndex] = useState(-1)
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [selectedStudentId, setSelectedStudentId] = useState(null)
   const [selectedStudentName, setSelectedStudentName] = useState(null)
@@ -24,7 +25,7 @@ function Peoples({ id, role }) {
   }, [peoples?.teachers?.length, id])
 
 
-  const removeStudent = (user_id) => {
+  const removeUser = (user_id) => {
     axios.post(SERVER_URL + "/class/remove-student", { class_id: id, user_id }, { withCredentials: true })
       .then(({ data }) => {
         if (data.success) {
@@ -35,6 +36,43 @@ function Peoples({ id, role }) {
           }));
         } else {
           toast.error("something went wrong!")
+        }
+      })
+      .catch(() => {
+        toast.error("something went wrong!")
+      })
+  }
+  const makeTeacher = (user) => {
+    axios.post(SERVER_URL + "/class/make/teacher", { class_id: id, user_id: user._id }, { withCredentials: true })
+      .then(({ data }) => {
+        if (data.success) {
+          setPeoples((prev) => ({
+            teachers: [...prev.teachers, user],
+            students: prev.students.filter((v) => String(v._id) !== String(user._id))
+          }));
+          setSelIndex(-1)
+          toast.success("Maked Teacher!")
+        } else {
+          toast.error(data.message || "something went wrong!")
+        }
+      })
+      .catch(() => {
+        toast.error("something went wrong!")
+      })
+  }
+
+  const makeStudent = (user) => {
+    axios.post(SERVER_URL + "/class/remove/teacher", { class_id: id, user_id: user._id }, { withCredentials: true })
+      .then(({ data }) => {
+        if (data.success) {
+          setPeoples((prev) => ({
+            students: [...prev.students, user],
+            teachers: prev.teachers.filter((v) => String(v._id) !== String(user._id))
+          }));
+          setSelTeacherIndex(-1)
+          toast.success("Removed from Teacher!")
+        } else {
+          toast.error(data.message || "something went wrong!")
         }
       })
       .catch(() => {
@@ -66,8 +104,23 @@ function Peoples({ id, role }) {
       {showStudent && <StudentPopup user={selectedStudent} username={selectedStudentName} handleClose={() => { setShowStudent(false) }} />}
       <h1 className='text-x py-2 rounded-md border border-tersiory px-4 font-bold'>Teachers</h1>
       {
-        peoples?.teachers?.map((teacher) => (
-          <div className='py-2 r w-[20rem] ml-4 px-4 text-lg rounded-md bg-secondery'>{teacher.username}</div>
+        peoples?.teachers?.map((teacher, i) => (
+          <div className='flex flex-col gap-2 ml-4 bg-secondery rounded-md'>
+            <div className='py-2 w-[20rem] pl-4 px-4 text-lg flex justify-between items-center rounded-md bg-secondery'>
+              <h3 >{teacher.username}</h3>
+              {role === "teacher" &&
+                <svg onClick={() => { setSelTeacherIndex((p) => p !== i ? i : -1) }} xmlns="http://www.w3.org/2000/svg" width="33" height="33" fill="currentColor" className="bi bi-three-dots-vertical cursor-pointer rounded-md duration-300 hover:bg-tersiory/30 p-2" viewBox="0 0 16 16">
+                  <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0m0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+                </svg>}
+            </div>
+            {selTeacherIndex === i &&
+              <div className='w-full flex justify-center items-center gap-2 p-2 h-full flex-col'>
+                <button className='bg-tersiory/30 py-1 hover:bg-tersiory/70 duration-300 w-full rounded-md' onClick={() => makeStudent(teacher)}>make as student</button>
+              </div>
+            }
+
+          </div>
+
         ))
       }
       <h1 className='text-x  py-2 rounded-md border border-tersiory px-4 font-bold'>Students</h1>
@@ -82,8 +135,9 @@ function Peoples({ id, role }) {
                 </svg>}
             </div>
             {selIndex === i &&
-              <div className='w-full flex justify-center items-center p-2 h-full flex-col'>
-                <button className='bg-secondery/20 w-full rounded-md' onClick={() => removeStudent(student._id)}>remove</button>
+              <div className='w-full flex justify-center items-center gap-2 p-2 h-full flex-col'>
+                <button className='bg-tersiory/30 py-1 hover:bg-tersiory/70 duration-300 w-full rounded-md' onClick={() => removeUser(student._id)}>remove</button>
+                <button className='bg-tersiory/30 py-1 hover:bg-tersiory/70 duration-300 w-full rounded-md' onClick={() => makeTeacher(student)}>make as teacher</button>
               </div>
             }
 

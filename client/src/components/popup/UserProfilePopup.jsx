@@ -9,7 +9,7 @@ function UserProfilePopup({ handleClose, username }) {
     window.document.location.reload()
   }
   return (
-    <div onClick={handleClose} className='bg-dark/70  w-screen backdrop-blur-sm  h-screen fixed top-0 left-0 z-[10000] flex justify-center items-center'>
+    <div onClick={handleClose} className='bg-dark/80 w-screen backdrop-blur-sm  h-screen fixed top-0 left-0 z-[10000] flex justify-center items-center'>
       <div onClick={(e) => e.stopPropagation()} className='bg-secondery rounded-md w-[30rem] h-fit p-4'>
         <h1 className='font-semibold text-2xl '>{username}</h1>
         <div className='flex justify-end w-full'>

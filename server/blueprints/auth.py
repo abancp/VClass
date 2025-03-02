@@ -12,6 +12,7 @@ def register():
     data = request.get_json()
     username = data.get('username')
     email = data.get('email')
+    profile_url = data.get('profile_url',None)
     sign_with_google = data.get('google',False)
 
     exist_user = users.find_one({"email":email})
@@ -21,11 +22,11 @@ def register():
             return jsonify({"message":"email already taken","success":False}) , 400
     else:
         if sign_with_google:
-            registerd_res = users.insert_one({"username": username, "email": email, "student":[],"teacher":[]})
+            registerd_res = users.insert_one({"username": username, "email": email, "student":[],"teacher":[],"profile_url":profile_url})
         else:
             password = data.get('password')
             hashed_password = bcrypt.hashpw(password.encode('utf-8'),bcrypt.gensalt())
-            registerd_res = users.insert_one({"username": username, "email": email, "password": hashed_password,"student":[],"teacher":[]})
+            registerd_res = users.insert_one({"username": username, "email": email, "password": hashed_password,"student":[],"teacher":[],"profile_url":profile_url})
         userid = str(registerd_res.inserted_id)
     print(userid)
     token = jwt.encode({
@@ -34,7 +35,7 @@ def register():
         "email":email,
     },str(os.getenv('JWT_SECRET')),algorithm='HS256')
 
-    res = make_response(jsonify({"message":"user registered successfully : "+username}))
+    res = make_response(jsonify({"success":True,"message":"user registered successfully : "+username}))
     print(token)
     res.set_cookie('token',token,max_age=360000,secure=True,samesite="None")
     return res
@@ -60,7 +61,7 @@ def login():
         "email":user['email'],
     },str(os.getenv("JWT_SECRET")),algorithm='HS256')
 
-    res = make_response(jsonify({"message":"user login successfully : "+user['username'],"username":user['username']}))
+    res = make_response(jsonify({"message":"user login successfully : "+user['username'],"username":user['username'],"profile_url":user['profile_url']}))
     res.set_cookie('token',token,max_age=360000,secure=True,samesite="None")
     return res
 
@@ -74,7 +75,8 @@ def get_userdata():
         user = users.find_one({"_id":ObjectId(data['userid'])})
         if not user:
             return jsonify({"success":False,"message":"user not found"})
-        return jsonify({"success":True,"username":data['username']})
-    except:
-        return jsonify({"success":False}) , 401
+        return jsonify({"success":True,"username":data['username'],"profile_url":user['profile_url']})
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False}) , 500 
 

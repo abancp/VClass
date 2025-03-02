@@ -53,7 +53,7 @@ function Signup() {
 
   const handleSignWithGoogle = () => {
     signInWithGoogle()
-      .then((user) => { handleSubmit({ google: true, email: user.email, username: user.displayName }) })
+      .then((user) => { handleSubmit({ google: true, email: user.email, username: user.displayName , profile_url: user.photoURL }) })
   }
 
   return <>
