@@ -211,7 +211,7 @@ def get_comments(class_id,doubt_id,userdata):
 @member_required
 def like_comment(class_id,comment_id,userdata):
     try:
-        existing = db[DOUBT_LIKES_COLLECTION].find_one({'user_id':ObjectId(userdata['userid']),"doubt_id":ObjectId(comment_id)})
+        existing = db[COMMENT_LIKES_COLLECTION].find_one({'user_id':ObjectId(userdata['userid']),"comment_id":ObjectId(comment_id)})
         if existing:
             if existing['type'] != "like":
                 db[COMMENT_LIKES_COLLECTION].update_one({'_id':existing['_id']},{"$set":{"type":"like"}})
@@ -223,8 +223,17 @@ def like_comment(class_id,comment_id,userdata):
                                         "dislikes":-1
                                     }
                                 })
+            else:
+                db[COMMENT_LIKES_COLLECTION].delete_one({"_id":ObjectId(existing['_id'])})
+                db[DOUBT_COMMENTS_COLLECTION].update_one(
+                                {'_id':ObjectId(comment_id)},
+                                {
+                                    "$inc":{
+                                        "likes":-1,
+                                    }
+                                })
         else:
-            db[COMMENT_LIKES_COLLECTION].insert_one({"user_id":ObjectId(userdata['userid']),"doubt_id":ObjectId(comment_id),"type":"like"})
+            db[COMMENT_LIKES_COLLECTION].insert_one({"user_id":ObjectId(userdata['userid']),"comment_id":ObjectId(comment_id),"type":"like"})
             db[DOUBT_COMMENTS_COLLECTION].update_one(
                                 {'_id':ObjectId(comment_id)},
                                 {
@@ -241,7 +250,8 @@ def like_comment(class_id,comment_id,userdata):
 @member_required
 def dislike_comment(class_id,comment_id,userdata):
     try:
-        existing = db[DOUBT_LIKES_COLLECTION].find_one({'user_id':ObjectId(userdata['userid']),"doubt_id":ObjectId(comment_id)})
+        existing = db[COMMENT_LIKES_COLLECTION].find_one({'user_id':ObjectId(userdata['userid']),"comment_id":ObjectId(comment_id)})
+        print(existing)
         if existing:
             if existing['type'] != "dislike":
                 db[COMMENT_LIKES_COLLECTION].update_one({'_id':existing['_id']},{"$set":{"type":"dislike"}})
@@ -253,8 +263,17 @@ def dislike_comment(class_id,comment_id,userdata):
                                         "dislikes":1,
                                     }
                                 })
+            else:
+                db[COMMENT_LIKES_COLLECTION].delete_one({"_id":ObjectId(existing['_id'])})
+                db[DOUBT_COMMENTS_COLLECTION].update_one(
+                                {'_id':ObjectId(comment_id)},
+                                {
+                                    "$inc":{
+                                        "dislikes":-1,
+                                    }
+                                })
         else:
-            db[COMMENT_LIKES_COLLECTION].insert_one({"user_id":ObjectId(userdata['userid']),"doubt_id":ObjectId(comment_id),"type":"dislike"})
+            db[COMMENT_LIKES_COLLECTION].insert_one({"user_id":ObjectId(userdata['userid']),"comment_id":ObjectId(comment_id),"type":"dislike"})
             db[DOUBT_COMMENTS_COLLECTION].update_one(
                                 {'_id':ObjectId(comment_id)},
                                 {
@@ -262,7 +281,7 @@ def dislike_comment(class_id,comment_id,userdata):
                                         "dislikes":1,
                                     }
                                 })
-        return jsonify({"success":True,"message":"Doubt disliked!"})
+        return jsonify({"success":True,"message":"Comment disliked!"})
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
