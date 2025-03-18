@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from "react-router"
 import useStore from '../../store/store'
 import UserProfilePopup from '../popup/UserProfilePopup'
@@ -51,7 +51,7 @@ function Header({ sub, handleMenuClick, handleClose, tab, sub1, forWhat, setTab 
           </svg>
         </Link>}
         {
-          isLogin && profileUrl && <img className='w-[1.7rem] rounded-2xl' referrerPolicy='no-referrer' src={profileUrl} alt="img" />
+          isLogin && profileUrl && <img className='h-[1.7rem] w-[1.7rem] object-cover rounded-2xl' referrerPolicy='no-referrer' src={profileUrl} alt="img" />
         }
         {
           isLogin ?

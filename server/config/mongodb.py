@@ -8,6 +8,7 @@ client = MongoClient(os.getenv("MONGO_URI"))
 
 db = client['VClass']
 
+
 users = db['users']
 classes = db['classes']
 works = db['works']
@@ -21,3 +22,4 @@ USERS_COLLECTION = 'users'
 DOUBTS_COLLECTION = 'doubts'
 DOUBT_COMMENTS_COLLECTION = 'doubt_comments'
 COMMENT_LIKES_COLLECTION = 'comment_likes'
+

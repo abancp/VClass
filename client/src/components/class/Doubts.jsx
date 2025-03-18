@@ -2,21 +2,26 @@ import axios from 'axios'
 import { document } from 'postcss'
 import React, { useEffect, useState } from 'react'
 import Scrollbars from 'react-custom-scrollbars-2'
+import Skeleton from 'react-loading-skeleton'
 import { toast } from 'sonner'
 import { SERVER_URL } from '../../config/SERVER_URL'
+import { motion } from 'framer-motion'
 
 function Doubts({ id, role }) {
 
   const [doubt, setDoubt] = useState("")
   const [doubts, setDoubts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [refresh, setRefresh] = useState(Date.now())
 
   useEffect(() => {
     axios.get(SERVER_URL + "/doubt/" + id + "?skip=0", { withCredentials: true })
       .then(({ data }) => {
         console.log(data)
+        setLoading(false)
         setDoubts(data.doubts)
       })
-  }, [id])
+  }, [id, refresh])
 
   const handleAskDoubt = (e) => {
     e.preventDefault()
@@ -25,6 +30,7 @@ function Doubts({ id, role }) {
       .then(() => {
         setDoubt("")
         toast.success("Doubt Posted!")
+        setRefresh(Date.now())
       })
   }
 
@@ -110,6 +116,7 @@ function Doubts({ id, role }) {
     axios.post(SERVER_URL + "/doubt/comment/" + id + "/" + doubts[i]?._id?.$oid, { comment: e.target["comment-" + i]?.value }, { withCredentials: true })
       .then(({ data }) => {
         if (data.success) {
+          setRefresh(Date.now())
           console.log("commented!")
         }
       })
@@ -198,25 +205,58 @@ function Doubts({ id, role }) {
       })
   }
 
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (!e.target.search.value) return
+    axios.post(SERVER_URL + "/doubt/search/" + id, { query: e.target.search.value }, { withCredentials: true })
+      .then(({ data }) => {
+        if (data.success) {
+          setDoubts(data.results)
+        }
+      })
+  }
+
+  const variants = {
+    visible: { opacity: 1, transition: { duration: 0.5 } }, // Adjust duration as needed
+    hidden: { opacity: 0, transition: { duration: 0.5 } }
+  };
   return (
     <div className='w-full pt-header items-center justify-end  p-3 h-[calc(100vh-3.5rem)] '>
       <Scrollbars className='flex flex-col gap-3 '>
+        <form onSubmit={handleSearch} className="w-full flex gap-3 mb-3">
+          <input placeholder='search here..' name="search" className='w-full bg-dark border focus:border-2 border-tersiory p-2 rounded-md focus:outline-none ' />
+          <button type='submit' className="focus:outline-none px-3 bg-tersiory rounded-md font-semibold">Search</button>
+
+        </form>
         {role === 'student' &&
           <form onSubmit={handleAskDoubt} className='flex mb-3 flex-col gap-3'>
-            <textarea onChange={(e) => setDoubt(e.target.value)} value={doubt} id="doubt" name='doubt' className='w-full bg-dark border border-tersiory/30 p-2 rounded-md focus:outline-none min-h-[5rem]'></textarea>
+            <textarea placeholder='write your doubt...' onChange={(e) => setDoubt(e.target.value)} value={doubt} id="doubt" name='doubt' className='w-full bg-dark border focus:border-2 border-tersiory p-2 rounded-md focus:outline-none min-h-[5rem]'></textarea>
             <div className='w-full flex justify-end '>
               <button type='submit' className={`px-2 py-1 ${doubt || "opacity-50"} focus:outline-none bg-tersiory rounded-md font-semibold`}>Ask Doubt</button>
 
             </div>
           </form>
         }
+        {
+          loading &&
+          <motion.div
+            variants={variants}
+            animate="visible"
+            initial="hidden" // Initially hidden
+            className='flex flex-col'
+          >
+            <Skeleton count={5} enableAnimation height={109} baseColor="#2a243e" highlightColor='#120f18B2' borderRadius={12} duration={2} />
+          </motion.div>
+        }
         <div className='rounded-2xl flex flex-col gap-3'>
           {
+            !loading &&
             doubts.map((d, i) => (
               <div>
                 <div className='bg-secondery/70 p-2 flex flex-col gap-3 rounded-2xl'>
                   <div className='flex justify-start items-center gap-2'>
-                    <img referrerPolicy='no-referrer' src={d.profile_url} alt="profile" className='w-[1.7rem]  rounded-full' />
+                    <img referrerPolicy='no-referrer' src={d.profile_url} alt="profile" className='w-[1.7rem] h-[1.7rem] object-cover rounded-full' />
                     <h4 className='text-lg font-semibold'>{d.username}</h4>
                   </div>
                   {d.doubt}
@@ -248,7 +288,7 @@ function Doubts({ id, role }) {
                         <path d="M5 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0m4 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
                         <path d="m2.165 15.803.02-.004c1.83-.363 2.948-.842 3.468-1.105A9 9 0 0 0 8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6a10.4 10.4 0 0 1-.524 2.318l-.003.011a11 11 0 0 1-.244.637c-.079.186.074.394.273.362a22 22 0 0 0 .693-.125m.8-3.108a1 1 0 0 0-.287-.801C1.618 10.83 1 9.468 1 8c0-3.192 3.004-6 7-6s7 2.808 7 6-3.004 6-7 6a8 8 0 0 1-2.088-.272 1 1 0 0 0-.711.074c-.387.196-1.24.57-2.634.893a11 11 0 0 0 .398-2" />
                       </svg>
-                      <h5>10</h5>
+                      <h5>{d.number_of_comments || 0}</h5>
                     </div>
                   </div>
                 </div>
@@ -286,7 +326,7 @@ function Doubts({ id, role }) {
                       <div className='w-full'>
                         <div className='bg-secondery/70 mt-3 p-2 w-full flex flex-col gap-3 rounded-2xl'>
                           <div className='flex justify-start items-center gap-2'>
-                            <img referrerPolicy='no-referrer' src={c.profile_url} alt="profile" className='w-[1.7rem]  rounded-full' />
+                            <img referrerPolicy='no-referrer' src={c.profile_url} alt="profile" className='w-[1.7rem] h-[1.7rem] object-cover  rounded-full' />
                             <h4 className='text-lg font-semibold'>{c.username}</h4>
                           </div>
                           {c.comment}

@@ -1,4 +1,7 @@
 client/node_modules
+live-chat/node_modules
+live-server/node_modules
+online-compiler/node_modules
 server/.venv
 server/.env
 ai/.venv

@@ -3,12 +3,9 @@ import axios from 'axios'
 import { SERVER_URL } from '../../config/SERVER_URL'
 import { toast } from 'sonner'
 import { QRCode } from 'react-qrcode-logo'
-import NoticeBoard from '../main/NoticeBoard'
 import { AnimatePresence, motion } from 'framer-motion'
 import Scrollbars from 'react-custom-scrollbars-2'
 import CreateResourcesPopup from '../popup/CreateResourcesPopup'
-import ReactPlayer from 'react-player'
-import CheckAnimation from '../sub/CheckAnimation'
 import GetSVG from '../sub/GetSVG'
 
 function ClassHome({ id, classData, role }) {
@@ -122,7 +119,7 @@ function ClassHome({ id, classData, role }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.3, ease: "easeOut", bounce: 0.3 }}
-            className={`w-[15rem] transition-all ${showQRCode ? "h-[24.5rem]" : "h-[9.9rem]"} p-3 light:bg-light-secondery/50 bg-secondery/50 rounded-2xl flex flex-col gap-3 duration-100 `}>
+            className={`w-[15rem] transition-all ${showQRCode ? "h-[24.5rem]" : "h-[9.9rem]"} p-3  bg-secondery/50 rounded-2xl flex flex-col gap-3 duration-100 `}>
             <div className='flex gap-2 flex-col justify-center items-start justify-between'>
               <h1 className=" text-lg font-semibold">Class Key</h1>
               <div className='flex justify-between items-center w-full'>
@@ -149,7 +146,7 @@ function ClassHome({ id, classData, role }) {
                 [15, 15, 15, 15], // Top-right
                 [15, 15, 15, 15], // Bottom-left
               ]}
-              bgColor='#120f18'
+              bgColor='transparent'
               fgColor='#1192B8'
               size={200}
               value={window.document.location.origin + "/join?name=" + classData.name + "&key=" + classData.key} />}
@@ -203,7 +200,7 @@ function ClassHome({ id, classData, role }) {
           <div
             className="w-full   bg-secondery/50 rounded-2xl"
           >
-            <div className='h-[2rem] flex justify-start items-center text-lg font-semibold text-left p-2 '>{srcs[selectedSrcIndex]?.title}</div>
+            <div className='h-[2rem] flex justify-center items-center text-lg font-semibold text-center w-full p-2 '>{srcs[selectedSrcIndex]?.title}</div>
             {/*<img alt={srcs[0]?.title} src={`https://img.youtube.com/vi/${srcs[0]?.url}/maxresdefault.jpg
 `} />*/}
             {srcs[selectedSrcIndex]?.type === "url/yt" ?
@@ -244,12 +241,11 @@ function ClassHome({ id, classData, role }) {
                   ></iframe>
             }
 
-
           </div>
         }
         <div className='bg-secondery/50 p-2 rounded-2xl h-[25rem]'>
           <Scrollbars style={{ "zIndex": 0 }} onScroll={handleAnnsScroll}>
-            <form onSubmit={handleAnnounce} className='bg-secondery flex gap-1 justify-center items-center w-full rounded-2xl  p-1'>
+            <form onSubmit={handleAnnounce} className={`bg-secondery  ${classData.settings?.announcements?.post_permission[role] || "hidden"} flex gap-1 justify-center items-center w-full rounded-2xl  p-1`}>
               <input name="announce" value={typedAnnounce} onChange={(e) => { setTypedAnnounce(e.target.value) }} placeholder='Type to announce something ..' className='w-full bg-transparent/50   rounded-2xl p-1 px-2 focus:outline-none ' />
               <button type='submit' className=''>
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" className={`bi bi-send rounded-md  cursor-pointer ${typedAnnounce ? "text-tersiory/70 hover:text-tersiory" : "text-dark "} duration-300 `} viewBox="0 0 16 16">

@@ -2,10 +2,12 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { SERVER_URL } from '../../config/SERVER_URL'
 import CreateWorkPopup from '../popup/CreateWorkPopup'
-import { Link } from 'react-router'
 import ReactMarkdown from 'react-markdown'
 import { toast } from 'sonner'
 import Switch from "react-switch"
+import Scrollbars from 'react-custom-scrollbars-2'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 
 function Works({ id, role }) {
   const [works, setWorks] = useState([])
@@ -15,7 +17,6 @@ function Works({ id, role }) {
   const [showWork, setShowWork] = useState(false)
   const [showFileUploader, setShowFileUploader] = useState(false)
   const [fileLink, setFileLink] = useState()
-  const [workid, setWorkid] = useState()
   const [selectedWork, setSelectedWork] = useState({})
   const [tab, setTab] = useState(role === "teacher" ? "submissions" : "instructions")
   const [acceptSubmits, setAcceptSubmits] = useState(true)
@@ -23,7 +24,8 @@ function Works({ id, role }) {
   const [submits, setSubmits] = useState([])
   const [quiz, setQuiz] = useState({})
   const [totalStudents, setTotalStudents] = useState(0)
-  const [saves, setSaves] = useState([])
+  const [worksLoading, setWorkLoading] = useState(true)
+
 
   useEffect(() => {
     if (workFetch && worksSkip === 0) {
@@ -32,10 +34,15 @@ function Works({ id, role }) {
     axios.get(SERVER_URL + "/work/works/" + id + "?skip=" + worksSkip, { withCredentials: true }).then(({ data }) => {
       if (data.success) {
         setWorkFetch(true)
+        setWorkLoading(false)
         console.log("Fetched works", works)
         setWorks((p) => [...p, ...data.works])
       }
     })
+      .catch(({ response }) => {
+        setWorkLoading(false)
+        toast.error(response?.data?.message || "something went wrong!")
+      })
   }, [worksSkip, workFetch, id])
 
   useEffect(() => {
@@ -121,44 +128,71 @@ function Works({ id, role }) {
   }
 
   return (
-    <div className='w-full flex flex-col gap-2 justify-start p-3 min-h-[calc(100vh-3.5rem)] '>
+    <div className='w-full flex flex-col bg-dark gap-2 justify-start p-3 min-h-[calc(100vh-3.5rem)] '>
 
 
       {(showWorkPopup && role === "teacher" && !showWork) && <CreateWorkPopup id={id} handleClose={() => { setShowWorkPopup(false) }} />}
       {!showWork &&
-        <div onScroll={handleWorksScroll} className={`gap-3 flex flex-col overflow-y-scroll p-3 pt-1 ${role === "teacher" ? "h-[calc(100vh-9.2rem)]" : "h-[calc(100vh-5rem)]"} w-full`}>
+        <div onScroll={handleWorksScroll} className={`gap-3 flex flex-col  p-3 pt-1 ${role === "teacher" ? "h-[calc(100vh-8.7rem)]" : "h-[calc(100vh-5rem)]"} w-full`}>
           {role === "teacher" && <div className='flex w-full justify-end'>
             <button onClick={handleExportExcel} className='p-1 px-2 hover:bg-tersiory text-light font-semibold duration-300 bg-tersiory/90 rounded-md' >Export to Excel</button>
           </div>}
           {
-            works.map((work) => (
-              <div className='rounded-2xl w-full p-2 bg-secondery/50'>
-                <h1 onClick={() => { setShowWork(true); setSelectedWork(work); setAcceptSubmits(work.accept_submits) }} className='font-semibold text-lg cursor-pointer hover:text-tersiory w-fit'>{work.title}</h1>
-                <div className='flex gap-3 mt-1  text-tersiory/90 '>
-                  <h6 className='font-light text-[14px]'>{work.teacher_name}</h6>
-                  <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>{work.type}</div>
-
-                  <h6 className='font-light text-[14px]' > {new Date(work.due_date).toLocaleString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'numeric',
-                  })}</h6>
-                </div>
-              </div>
-            ))
+            worksLoading &&
+            <Scrollbars>
+              <Skeleton count={10} enableAnimation height={60} baseColor="#2a243e" highlightColor='#120f18B2' borderRadius={10} duration={2} containerClassName='flex flex-col' />
+            </Scrollbars>
           }
-        </div>}
-      {(!showWork && role === "teacher") &&
-        <div onClick={() => { setShowWorkPopup((p) => (!p)) }} className='cursor-pointer hover:text-tersiory duration-300 h-[4rem] gap-3 rounded-md w-full flex bg-secondery items-center justify-center'>
-          <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
-          </svg>
-          <h1 className='text-2xl'>Create</h1>
+
+          <Scrollbars>
+            {
+              !worksLoading &&
+                works.length === 0
+                ?
+                <div className='bg-transparent flex-col gap-5 flex w-full h-full justify-center text-tersiory items-center'>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="206" height="206" fill="currentColor" class="bi bi-patch-check opacity-50" viewBox="0 0 16 16">
+                    <path className='text-green-600' fill-rule="evenodd" d="M10.354 6.146a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708 0" />
+                    <path d="m10.273 2.513-.921-.944.715-.698.622.637.89-.011a2.89 2.89 0 0 1 2.924 2.924l-.01.89.636.622a2.89 2.89 0 0 1 0 4.134l-.637.622.011.89a2.89 2.89 0 0 1-2.924 2.924l-.89-.01-.622.636a2.89 2.89 0 0 1-4.134 0l-.622-.637-.89.011a2.89 2.89 0 0 1-2.924-2.924l.01-.89-.636-.622a2.89 2.89 0 0 1 0-4.134l.637-.622-.011-.89a2.89 2.89 0 0 1 2.924-2.924l.89.01.622-.636a2.89 2.89 0 0 1 4.134 0l-.715.698a1.89 1.89 0 0 0-2.704 0l-.92.944-1.32-.016a1.89 1.89 0 0 0-1.911 1.912l.016 1.318-.944.921a1.89 1.89 0 0 0 0 2.704l.944.92-.016 1.32a1.89 1.89 0 0 0 1.912 1.911l1.318-.016.921.944a1.89 1.89 0 0 0 2.704 0l.92-.944 1.32.016a1.89 1.89 0 0 0 1.911-1.912l-.016-1.318.944-.921a1.89 1.89 0 0 0 0-2.704l-.944-.92.016-1.32a1.89 1.89 0 0 0-1.912-1.911z" />
+                  </svg>
+                  <h1 className='font-semibold text-light text-2xl opacity-50'>No Work here </h1>
+
+                </div>
+
+                :
+                works.map((work) => (
+                  <div className='rounded-2xl w-full p-2 my-3 bg-secondery/50'>
+                    <h1 onClick={() => { setShowWork(true); setSelectedWork(work); setAcceptSubmits(work.accept_submits) }} className='font-semibold  text-lg cursor-pointer hover:text-tersiory w-fit'>{work.title}</h1>
+                    <div className='flex gap-3 mt-1  text-tersiory/90 '>
+                      <h6 className='font-light text-[14px]'>{work.teacher_name}</h6>
+                      <div className=' px-[4px]  text-light border border-tersiory/70 bg-tersiory/30 flex justify-center items-center text-xs rounded-full'>{work.type}</div>
+
+                      <h6 className='font-light text-[14px]' > {new Date(work.due_date).toLocaleString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'numeric',
+                      })}</h6>
+                    </div>
+                  </div>
+                ))
+            }
+          </Scrollbars>
+        </div>
+      }
+      {
+        (!showWork && role === "teacher") &&
+        <div className='flex justify-center w-full'>
+          <div onClick={() => { setShowWorkPopup((p) => (!p)) }} className='cursor-pointer hover:text-tersiory duration-300 h-[3rem] gap-3 rounded-2xl w-fit p-[1.3rem] flex bg-secondery items-center justify-center'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="29" height="29" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+              <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4" />
+            </svg>
+            <h1 className='text-2xl'>Create</h1>
+          </div>
         </div>
       }
 
-      {showWork &&
+      {
+        showWork &&
         <>
           <div className='flex justify-between items-center'>
             <svg onClick={() => setShowWork(false)} xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="currentColor" className="hover:rotate-[180deg] duration-300 text-tersiory cursor-pointer bi bi-x-lg" viewBox="0 0 16 16">

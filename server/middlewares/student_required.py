@@ -19,7 +19,7 @@ def student_required(f):
             if not token or not class_id:
                 return jsonify({"success":False,"message":"Auth failed"}) , 401
             data = jwt.decode(token,str(os.getenv("JWT_SECRET")),algorithms=['HS256'])
-            redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+            redis_client = redis.Redis(host=os.getenv('REDIS_HOST'), port=6379, db=0, decode_responses=True)
             cached_role = redis_client.get(f"user_roles:{data['userid']}_{class_id}")
             if cached_role:
                 if cached_role != "s":

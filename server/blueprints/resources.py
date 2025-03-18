@@ -1,5 +1,4 @@
 from datetime import time
-from typing import Required
 from b2sdk._internal.encryption.setting import urllib
 from flask import Blueprint, jsonify, request
 from google.generativeai.types.content_types import to_part

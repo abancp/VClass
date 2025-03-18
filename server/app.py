@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 import flask
 from flask_cors import CORS
 from blueprints import doubt
-from config.mongodb import client 
+from config.mongodb import client ,db
 from blueprints.auth import auth_bp
 from blueprints.class_bp import class_bp
 from blueprints.announcement import ann_bp
@@ -12,14 +12,14 @@ from blueprints.ai import ai_bp
 from blueprints.doubt import doubt_bp
 from blueprints.resources import src_bp
 from dotenv import load_dotenv
-import os
+from bson import ObjectId
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(
     app,
-    origins=["http://localhost:3000","https://vclass-xi.vercel.app"],
+    origins=["http://localhost:3000","http://192.168.124.235:3000","https://vclass-xi.vercel.app"],
     allow_headers=[
     "Content-Type",
     "Authorization",
@@ -48,6 +48,14 @@ with app.app_context():
     try:
         client.admin.command('ping')
         print("Mongodb Connected !")
+        ai = db['users'].find_one({"email":"ai@vclass.com"})
+        if ai:
+            app.config['AI_ID'] = ai['_id']
+        else:
+            res = db['users'].insert_one({"username":"VClass AI","email":"ai@vclass.com","student":[],"teacher":[],"profile_url":"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRT6mB9psRLZ1w3gSxezEl5ryhVBL3lGn6Yhw&s"})
+            app.config['AI_ID'] = res.inserted_id
+        print(type(app.config['AI_ID']),app.config['AI_ID'])
+            
     except Exception as e:
         print("Error connecting mongodb : "+str(e))
 
@@ -57,4 +65,4 @@ def home():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0',port=5000)

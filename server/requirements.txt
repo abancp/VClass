@@ -1,4 +1,5 @@
 flask
+pandas
 python_dotenv
 pymongo
 pyjwt
@@ -9,3 +10,6 @@ nanoid
 gunicorn
 google.generativeai
 b2sdk
+PyPDF2
+pika
+redis

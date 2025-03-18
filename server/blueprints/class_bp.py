@@ -1,9 +1,10 @@
 import jwt
+import pandas as pd
+import io
 from jwt import algorithms
-from pandas.core.methods.describe import describe_categorical_1d
 from pika.spec import methods
 from bson.objectid import ObjectId
-from flask import Blueprint, current_app, json, jsonify, make_response, request
+from flask import Blueprint, current_app, json, jsonify, make_response, request, send_file
 from config.mongodb import classes,users,submits,works,anns,srcs,events,db
 from middlewares.jwt_protect import jwt_required
 from nanoid import generate
@@ -16,7 +17,7 @@ from utils import convert_objectid_to_string
 
 
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+redis_client = redis.Redis(host=os.getenv('REDIS_HOST'), port=6379, db=0, decode_responses=True)
 
 
 class_bp = Blueprint('class',__name__)
@@ -33,6 +34,20 @@ def create_class(userdata):
         data['key'] = unique_key
         data['number_of_students'] = 0
         data['creater'] = ObjectId(userdata['userid'])
+
+        data['settings'] = {
+            "announcements":{
+                "post_permission":{
+                    "teacher":True,
+                    "student":True
+                },
+            },
+            "doubts":{
+                "comment_permission":"everyone",
+                "ai_comment":"all"
+            }
+        }
+
         inserted_class = classes.insert_one(data)
         users.update_one({"_id":ObjectId(userdata['userid'])},{"$push":{"teacher":inserted_class.inserted_id}})
         token = jwt.encode(userdata,os.getenv('JWT_SECRET'),algorithm='HS256')
@@ -379,4 +394,29 @@ def get_info(class_id,userdata):
         print(e)
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
 
+@class_bp.route("/att/<class_id>",methods=['POST'])
+@teacher_required
+def update_att(class_id,userdata):
+    try:
+        data = request.get_json()
+        db['atts'].insert_one({"class_id":ObjectId(class_id),"att":data['att']})
+        return jsonify({"success":True,"message":"updated"})
+    except Exception as e:
+        print(e)
+        return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+
+@class_bp.route('/<class_id>/att/export-excel',methods=['GET'])
+@teacher_required
+def export_submits(class_id,userdata):
+
+    data = list(db['atts'].find({"class_id":ObjectId(class_id)}))# Exclude MongoDB "_id" field
+    print(data)
+    #data = list(submits.find({"class_id":ObjectId(class_id)}, {"_id": 0})) 
+    df = pd.DataFrame(data)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Data')
+    
+    output.seek(0)
+    return send_file(output, download_name="data.xlsx", as_attachment=True, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 

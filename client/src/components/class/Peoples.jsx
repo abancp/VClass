@@ -5,8 +5,7 @@ import { toast } from 'sonner'
 import { useNavigate } from 'react-router'
 import StudentPopup from '../popup/StudentPopup'
 
-function Peoples({ id, role }) {
-  const [peoples, setPeoples] = useState({ students: [], teachers: [] })
+function Peoples({ id, role, peoples, setPeoples }) {
   const [selIndex, setSelIndex] = useState(-1)
   const [selTeacherIndex, setSelTeacherIndex] = useState(-1)
   const [selectedStudent, setSelectedStudent] = useState(null)

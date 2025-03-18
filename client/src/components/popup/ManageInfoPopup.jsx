@@ -64,7 +64,7 @@ function ManageInfoPopup({ handleClose, id, visiter }) {
         }
         {
           tab === "edit" ?
-            <textarea value={info} onChange={(e) => setInfo(e.target.value)} className='focus:outline-none w-full  bg-tersiory/5 p-2 h-full focus:border focus:border-tersiory/50  rounded-md'>
+            <textarea disabled={visiter} value={info} onChange={(e) => setInfo(e.target.value)} className='focus:outline-none w-full  bg-tersiory/5 p-2 h-full focus:border focus:border-tersiory/50  rounded-md'>
 
             </textarea> :
             <ReactMarkdown className={"h-full w-full text-left p-2"} remarkPlugins={[remarkGfm]}>{info}</ReactMarkdown>

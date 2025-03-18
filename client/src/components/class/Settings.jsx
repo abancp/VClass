@@ -32,15 +32,34 @@ function Settings({ id, role }) {
         <ManageInfoPopup handleClose={() => setShowManageInfoPapup(false)} id={id} />
       }
       <div className='rounded-2xl bg-secondery/5 p-2 flex border border-secondery/20 flex-col gap-3 mt-[2rem]'>
+        <h1 className='text-2xl text-tersiory font-bold '>Announcements</h1>
+        <p>Manage announcements section in your class</p>
+        <div className='w-full h-0 border-t border-tersiory/30'></div>
+        <div className='flex justify-between w-full'>
+          <h4>Who can post announcements : </h4>
+          <select className='text-light bg-dark w-[16rem] cursor-pointer focus:outline-none rounded-md border border-tersiory/80'>
+            <option className='bg-dark text-light'>Everyone</option>
+            <option className='bg-dark text-light'>Teachers</option>
+          </select>
+        </div>
+      </div>
+      <div className='rounded-2xl bg-secondery/5 p-2 flex border border-secondery/20 flex-col gap-3 mt-[2rem]'>
         <h1 className='text-2xl text-tersiory font-bold '>Doubts</h1>
         <p>Manage doubts section in your class</p>
         <div className='w-full h-0 border-t border-tersiory/30'></div>
         <div className='flex justify-between w-full'>
           <h4>Select which Questions need answer ai : </h4>
-          <select className='text-light bg-dark focus:outline-none rounded-md border border-tersiory/80'>
+          <select className='text-light bg-dark w-[16rem]  cursor-pointer focus:outline-none rounded-md border border-tersiory/80'>
             <option className='bg-dark text-light'>All Questions</option>
             <option className='bg-dark text-light'>AI selcted Common Questions</option>
             <option className='bg-dark text-light'>None</option>
+          </select>
+        </div>
+        <div className='flex justify-between w-full'>
+          <h4>Who can answer doubts : </h4>
+          <select className='text-light bg-dark w-[16rem] cursor-pointer focus:outline-none rounded-md border border-tersiory/80'>
+            <option className='bg-dark text-light'>Everyone</option>
+            <option className='bg-dark text-light'>Teachers</option>
           </select>
         </div>
       </div>

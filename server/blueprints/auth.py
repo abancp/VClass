@@ -51,6 +51,8 @@ def login():
     if not user:
         return jsonify({"message":"user not found or password not matching"}) , 401
     if not sign_with_google: 
+        if user.get('password',None) == None:
+            return jsonify({"message":"user not found or password not matching"}) , 401
         if not bcrypt.checkpw(password.encode('utf-8'),user['password']):
             return jsonify({"message":"user not found or password not matching"}) , 401
 

@@ -1,15 +1,17 @@
 import datetime
 import json
-from flask import Blueprint, jsonify, request
-from proto import DOUBLE
-from werkzeug.datastructures.structures import exceptions
+from flask import Blueprint, jsonify, request,current_app
 from config.mongodb import COMMENT_LIKES_COLLECTION, DOUBT_COMMENTS_COLLECTION, DOUBTS_COLLECTION, USERS_COLLECTION, db,DOUBT_LIKES_COLLECTION 
-from middlewares import memeber_required
+from config.rabbitmq import channel
 from middlewares.memeber_required import member_required
 from middlewares.student_required import student_required
 from bson import ObjectId,json_util
+import requests
 
 doubt_bp = Blueprint('doubt',__name__)
+
+channel.queue_declare(queue='embedding_Q')
+channel.queue_declare(queue='doubt_replay_Q')
 
 @doubt_bp.route('/<class_id>',methods=['POST','GET'])
 def ask_get_doubt(class_id):
@@ -26,10 +28,16 @@ def ask_doubt(class_id,userdata):
     try:
         data = request.get_json()
         time = int(datetime.datetime.now().timestamp()*1000)
-        doubt = {"user_id":ObjectId(userdata['userid']),"class_id":ObjectId(class_id),"doubt":data['doubt'],"time":time,"likes":0,"dislikes":0}
-        db['doubts'].insert_one(doubt)
+        doubt = {"user_id":ObjectId(userdata['userid']),"class_id":ObjectId(class_id),"doubt":data['doubt'],"time":time,"likes":0,"dislikes":0,"comments":0}
+        res = db['doubts'].insert_one(doubt)
+
+        channel.basic_publish(exchange='', routing_key='embedding_Q', body=json.dumps({"_id":str(res.inserted_id),"text":data['doubt']}))
+        channel.basic_publish(exchange='', routing_key='doubt_answer_Q', body=json.dumps({"doubt_id":str(res.inserted_id),"doubt":data['doubt'],"ai_id":str(current_app.config['AI_ID'])}))
+
+        print(" [x] Sent text")
         return jsonify({"success":True,"message":"doubt asked!"})
     except Exception as e:
+        print(e)
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
 
 @member_required
@@ -66,6 +74,7 @@ def get_doubts(class_id,userdata):
                 "doubt":1,
                 "likes":1,
                 "dislikes":1,
+                "number_of_comments":"$comments",
                 "username":"$user_data.username",
                 "profile_url":"$user_data.profile_url",
                 "time":1,
@@ -154,6 +163,11 @@ def add_comment(class_id,doubt_id,userdata):
         data = request.get_json()
         time = int(datetime.datetime.now().timestamp()*1000)
         db[DOUBT_COMMENTS_COLLECTION].insert_one({"doubt_id":ObjectId(doubt_id),"user_id":ObjectId(userdata['userid']),"comment":data['comment'],"likes":0,"dislikes":0,"time":time}) 
+        db[DOUBTS_COLLECTION].update_one({"_id":ObjectId(doubt_id)},
+            {"$inc":{
+                "comments":1
+            }
+        })
         return jsonify({"success":True,"message":"commented!"})
     except Exception as e:
         print(e)
@@ -285,3 +299,24 @@ def dislike_comment(class_id,comment_id,userdata):
     except Exception as e:
         print(e)
         return jsonify({"success":False,"message":"something went wrong!","error":str(e)}),500
+
+@doubt_bp.route("/search/<class_id>",methods=['POST'])
+@member_required
+def search_doubts(class_id,userdata):
+    data = request.get_json()
+    query = data['query']
+    res = requests.post("http://localhost:8001/embed",json={"text":query})
+    print(res)
+    print(res.json().get('embedding',None))
+    pipeline = [
+        {"$vectorSearch":{
+            "index":"doubts_search",
+            "path":"embedding",
+            "queryVector":res.json().get('embedding',None),
+            "numCandidates":100,
+            "limit":5,
+            "filter":{"class_id":ObjectId(class_id)}
+        }}
+    ]
+    results = db[DOUBTS_COLLECTION].aggregate(pipeline)
+    return jsonify({"success":True,"results":json.loads(json_util.dumps(results))})

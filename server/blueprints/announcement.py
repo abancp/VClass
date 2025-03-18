@@ -1,7 +1,8 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, request
+from pika.adapters.blocking_connection import ReturnedMessage
 from middlewares.memeber_required import member_required
-from config.mongodb import anns
+from config.mongodb import anns,classes
 import json
 from bson import json_util
 from bson.objectid import ObjectId
@@ -14,6 +15,12 @@ def create_ann(userdata):
     try:
         data = request.get_json()
         data['class_id'] = ObjectId(data['class_id'])
+        class_ = classes.find_one({"_id":ObjectId(data['class_id'])})
+        if not class_:
+            return jsonify({"success":False,"message":"class not found"}),404
+        post_permission = class_.get("settings",{}).get("announcements",{}).get("post_permission",{}).get(userdata['role'],False)
+        if not post_permission:
+            return jsonify({"success":False,"message":"permission denied for post permission"}),403
         data['user_id'] = ObjectId(userdata['userid'])
         data['time'] = int(datetime.now().timestamp()*1000)
         data['username'] = userdata['username']

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vclass-backend 
+  labels:
+    name: vclass-backend
+    app: flask
+
+spec:
+  containers:
+    - name: vclass-backend 
+      image: vclass-backend:latest
+      imagePullPolicy: Never  
+      ports:
+        - containerPort: 5000
+      env:
+        - name: MONGO_URI
+          value: "mongodb+srv://abancpchengani:1%402%40Aban@cluster0.c5ytl.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+        - name: REDIS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: vclass-backend
+              key: REDIS_SECRET
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: vclass-backend
+              key: JWT_SECRET
+        - name: B2_APP_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: vclass-backend
+              key: B2_APP_KEY_ID
+        - name: B2_APP_KEY
+          valueFrom:
+            secretKeyRef:
+              name: vclass-backend
+              key: B2_APP_KEY
+        - name: B2_BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: vclass-backend
+              key: B2_BUCKET_NAME
+
