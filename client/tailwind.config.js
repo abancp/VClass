@@ -6,10 +6,16 @@ module.exports = {
   darkMode: "class",
   theme: {
     extend: {
-      colors: {
+      ecolors: {
         dark: "#120f18",
         secondery: "#2a243e",
         tersiory: "#1192B8",
+        light: "#B6EADA"
+      },
+      colors: {
+        dark: "#0e0b0f",
+        secondery: "#24132b",
+        tersiory: "#990bd6",
         light: "#B6EADA"
       },
       Wcolors: {
